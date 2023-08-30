@@ -1,0 +1,45 @@
+{
+  "type": "module",
+  "private": true,
+  "version": "0.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "vite",
+    "lint": "standardx -v \"./**/*.ts\"",
+    "build-tests": "esbuild test/*.ts --platform=node --format=esm --outdir=test --keep-names",
+    "test": "npm run build && npm run build-tests && NODE_ENV=test node ./test/index.js | tap-arc",
+    "build": "mkdir -p public && rm -rf ./public/* && vite build",
+    "preversion": "npm run lint",
+    "postversion": "git push && git push --tags",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@preact/preset-vite": "^2.5.0",
+    "@socketsupply/tapzero": "^0.7.1",
+    "@typescript-eslint/parser": "^5.55.0",
+    "esbuild": "^0.15.18",
+    "postcss-nesting": "^12.0.1",
+    "standardx": "^7.0.0",
+    "tap-arc": "^0.3.5",
+    "typescript": "^5.0.2"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./*": {
+      "import": [
+        "./dist/*.js",
+        "./dist/*"
+      ],
+      "require": [
+        "./dist/*.cjs",
+        "./dist/*"
+      ]
+    }
+  },
+  "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)",
+  "license": "AGPL-3.0-or-later"
+}
