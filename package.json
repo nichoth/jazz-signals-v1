@@ -8,7 +8,7 @@
     "lint": "standardx -v \"./**/*.ts\"",
     "build-tests": "esbuild test/*.ts --platform=node --format=esm --outdir=test --keep-names",
     "test": "npm run build && npm run build-tests && NODE_ENV=test node ./test/index.js | tap-arc",
-    "build": "mkdir -p public && rm -rf ./public/* && vite build",
+    "build": "mkdir -p public && rm -rf ./public/* && rm -rf ./public/* && vite build",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
     "prepublishOnly": "npm run build"
