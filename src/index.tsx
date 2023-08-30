@@ -1,12 +1,12 @@
-import { render, JSX, Component, FunctionComponent } from 'preact'
-import { TodoApp } from './todo-app'
-import { useEffect, useState } from 'preact/hooks'
-import {
-    consumeInviteLinkFromWindowLocation,
-    AuthProvider,
-    createBrowserNode
-} from 'jazz-browser'
-import { useSignal } from '@preact/signals'
+// import { render, JSX, Component, FunctionComponent } from 'preact'
+// import { TodoApp } from './todo-app'
+// import { useEffect, useState } from 'preact/hooks'
+// import {
+//     consumeInviteLinkFromWindowLocation,
+//     AuthProvider,
+//     createBrowserNode
+// } from 'jazz-browser'
+import { useSignal, Signal } from '@preact/signals'
 
 // import {
 //     LocalNode,
@@ -17,16 +17,47 @@ import { useSignal } from '@preact/signals'
 //     AccountID,
 //     Profile,
 // } from 'cojson'
-import { CoMap, CoID, LocalNode, AccountID } from 'cojson'
+import { ContentType, CoID, LocalNode } from 'cojson'
 
-type TaskContent = { done: boolean; text: string };
-type Task = CoMap<TaskContent>;
-type TodoListContent = {
-    title: string;
-    // other keys form a set of task IDs
-    [taskId: CoID<Task>]: true;
+// type TaskContent = { done: boolean; text: string };
+// type Task = CoMap<TaskContent>;
+// type TodoListContent = {
+//     title: string;
+//     // other keys form a set of task IDs
+//     [taskId: CoID<Task>]: true;
+// }
+// type TodoList = CoMap<TodoListContent>
+
+/**
+ * We don't want the format of `useX`. We want to disentangle the dependencies
+ * of the various functions.
+ */
+
+export async function telepathicSignal<T extends ContentType> (
+    localNode:LocalNode,
+    id?: CoID<T>
+):Promise<Signal<T|null>> {
+    const state = useSignal<T|null>(null)
+    if (!id) return state
+
+    let node
+    try {
+        node = await localNode.load(id)
+    } catch (err) {
+        console.log('Failed to load', id, err)
+    }
+
+    node.subscribe((newState) => {
+        // console.log(
+        //     "Got update",
+        //     id,
+        //     newState.toJSON(),
+        // );
+        state.value = newState as T
+    })
+
+    return state
 }
-type TodoList = CoMap<TodoListContent>
 
 // export type AuthHook = () => {
 //     auth: AuthProvider;
@@ -69,12 +100,12 @@ type TodoList = CoMap<TodoListContent>
  *   `<JazzContext.Provider value={{ localNode: node, logOut }}>`
  */
 
-render(<TodoApp
-    syncAddress={
-        new URLSearchParams(window.location.search).get('sync') || undefined
-    }
-    auth={LocalAuth({
-        appName: 'Jazz + Preact Todo List Example',
-        Component: PrettyAuthComponent,
-    })}
-/>, document.getElementById('root')!)
+// render(<TodoApp
+//     syncAddress={
+//         new URLSearchParams(window.location.search).get('sync') || undefined
+//     }
+//     auth={LocalAuth({
+//         appName: 'Jazz + Preact Todo List Example',
+//         Component: PrettyAuthComponent,
+//     })}
+// />, document.getElementById('root')!)

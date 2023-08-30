@@ -15,7 +15,7 @@ import { useSignal } from '@preact/signals'
 //     AccountID,
 //     Profile,
 // } from 'cojson'
-import { CoMap, CoID, LocalNode, AccountID } from 'cojson'
+import { CoMap, CoID, LocalNode } from 'cojson'
 
 type TaskContent = { done: boolean; text: string };
 type Task = CoMap<TaskContent>;
@@ -66,7 +66,6 @@ type TodoList = CoMap<TodoListContent>
  * `WithJazz` sets the `value` in the context
  *   `<JazzContext.Provider value={{ localNode: node, logOut }}>`
  */
-
 
 export const TodoApp:FunctionComponent<{
     syncAddress?:string,
