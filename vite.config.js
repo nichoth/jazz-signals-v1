@@ -41,6 +41,7 @@ export default defineConfig({
     build: {
         minify: false,
         outDir: '../public',
+        emptyOutDir: true,
         sourcemap: 'inline'
     }
 })
