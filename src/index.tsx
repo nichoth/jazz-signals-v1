@@ -59,6 +59,14 @@ export async function telepathicSignal<T extends ContentType> (
     return state
 }
 
+//
+// need the auth component also
+//
+
+export function authSignal () {
+
+}
+
 // export type AuthHook = () => {
 //     auth: AuthProvider;
 //     AuthUI:
