@@ -5,13 +5,19 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "vite",
-    "lint": "standardx -v \"./**/*.ts\"",
+    "lint": "standardx -v \"./**/*.tsx\"",
     "build-tests": "esbuild test/*.ts --platform=node --format=esm --outdir=test --keep-names",
     "test": "npm run build && npm run build-tests && NODE_ENV=test node ./test/index.js | tap-arc",
     "build": "vite build",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
     "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@preact/signals": "^1.2.1",
+    "cojson": "^0.1.3",
+    "jazz-browser": "^0.1.3",
+    "jazz-browser-auth-local": "^0.1.3"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
@@ -40,6 +46,5 @@
       ]
     }
   },
-  "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)",
-  "license": "AGPL-3.0-or-later"
+  "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)"
 }

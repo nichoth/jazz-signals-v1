@@ -1,32 +1,17 @@
-import { render, JSX, Component, FunctionComponent } from 'preact'
+import { render } from 'preact'
+import { LocalAuth } from '../src/auth-local'
 import { TodoApp } from './todo-app'
-import { useEffect, useState } from 'preact/hooks'
-import {
-    consumeInviteLinkFromWindowLocation,
-    AuthProvider,
-    createBrowserNode
-} from 'jazz-browser'
-import { useSignal } from '@preact/signals'
 
-// import {
-//     LocalNode,
-//     ContentType,
-//     CoID,
-//     ProfileContent,
-//     CoMap,
-//     AccountID,
-//     Profile,
-// } from 'cojson'
-import { CoMap, CoID, LocalNode, AccountID } from 'cojson'
+// import { CoMap, CoID } from 'cojson'
 
-type TaskContent = { done: boolean; text: string };
-type Task = CoMap<TaskContent>;
-type TodoListContent = {
-    title: string;
-    // other keys form a set of task IDs
-    [taskId: CoID<Task>]: true;
-}
-type TodoList = CoMap<TodoListContent>
+// type TaskContent = { done: boolean; text: string };
+// type Task = CoMap<TaskContent>;
+// type TodoListContent = {
+//     title: string;
+//     // other keys form a set of task IDs
+//     [taskId: CoID<Task>]: true;
+// }
+// type TodoList = CoMap<TodoListContent>
 
 // export type AuthHook = () => {
 //     auth: AuthProvider;
