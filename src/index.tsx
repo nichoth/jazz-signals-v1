@@ -3,7 +3,7 @@ import {
 } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
 import { useMemo } from 'preact/hooks'
-import { signal, Signal, useSignal } from '@preact/signals'
+import { signal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
 export async function telepathicSignal<T extends ContentType> (
@@ -48,16 +48,20 @@ export type AuthStatus = { status: null } |
  * Fills the place of `useJazz` in the react example.
  * Use this to get a `localNode`.
  */
-export function localAuthSignals (appName:string, appHostname?:string, opts?:{
+export async function localAuth (appName:string, appHostname:string|undefined, opts:{
+    authStatus:Signal<AuthStatus>// = signal({ status: null })
+    // localNode:Signal<LocalNode|null>// = signal(null)
+    // const localNode:Signal<LocalNode|null> = signal(null)
     syncAddress?:string;
-}):{
-    authStatus:Signal<AuthStatus>;
-    localNode:Signal<LocalNode|null>;
-} {
+}):Promise<{
+    // authStatus:AuthStatus;
+    localNode:LocalNode;
+}> {
     // const authStatus:Signal<AuthStatus> = signal({ status: null })
     // const localNode:Signal<LocalNode|null> = signal(null)
-    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
-    const localNode:Signal<LocalNode|null> = useSignal(null)
+    // const authStatus:Signal<AuthStatus> = useSignal({ status: null })
+    // const localNode:Signal<LocalNode|null> = useSignal(null)
+    const { authStatus } = opts
     const logoutCount:Signal<number> = signal(0)
     const { syncAddress } = (opts || {})
 
@@ -96,16 +100,21 @@ export function localAuthSignals (appName:string, appHostname?:string, opts?:{
 
     console.log('local auth', localAuth)
 
-    createBrowserNode({
+    const nodeHandle = await createBrowserNode({
         auth: localAuth,
         syncAddress
-    }).then(nodeHandle => {
-        localNode.value = nodeHandle.node
-    }).catch(err => {
-        console.log('errrrrrrrrrr', err)
     })
 
-    console.log('local node', localNode.value)
+    // createBrowserNode({
+    //     auth: localAuth,
+    //     syncAddress
+    // }).then(nodeHandle => {
+    //     localNode.value = nodeHandle.node
+    // }).catch(err => {
+    //     console.log('errrrrrrrrrr', err)
+    // })
 
-    return { authStatus, localNode }
+    console.log('local node', nodeHandle.node)
+
+    return { localNode: nodeHandle.node }
 }

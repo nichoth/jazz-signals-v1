@@ -3,7 +3,7 @@ import { LocalNode, CoID, CoMap } from 'cojson'
 import { useCallback, useEffect, useState } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Signal, effect, signal, useSignal } from '@preact/signals'
-import { localAuthSignals, AuthStatus } from '../src/index.jsx'
+import { localAuth, AuthStatus } from '../src/index.jsx'
 import { AuthLocal } from './auth-local.jsx'
 import './todo-app.css'
 
@@ -29,15 +29,16 @@ export function TodoApp ({ appName, syncAddress, appHostName }:{
     // })
 
     // let authStatus:Signal<AuthStatus|null> = signal(null)
-    // let localNode:Signal<LocalNode|null> = signal(null)
+    const localNode:Signal<LocalNode|null> = signal(null)
     const authStatus:Signal<AuthStatus> = useSignal({ status: null })
 
-    useCallback(() => {
-        const res = localAuthSignals(appName, appHostName, {
+    useCallback(async () => {
+        const res = await localAuth(appName, appHostName, {
+            authStatus,
             syncAddress
         })
-        authStatus = res.authStatus
-        localNode = res.localNode
+        // authStatus = res.authStatus
+        localNode.value = res.localNode
     }, [appName, appHostName, syncAddress])
 
     // const authStatus:Signal<AuthStatus> = useSignal({ status: null })
@@ -48,9 +49,9 @@ export function TodoApp ({ appName, syncAddress, appHostName }:{
 
     const [listId, setListId] = useState<CoID<TodoList>>()
 
-    localAuthSignals(appName, undefined, {
-        syncAddress,
-    })
+    // localAuthSignals(appName, undefined, {
+    //     syncAddress,
+    // })
 
     console.log('render', authStatus.value, localNode.value)
 
