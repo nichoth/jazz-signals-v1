@@ -1,8 +1,11 @@
 import { FunctionComponent } from 'preact'
-import { CoID, CoMap } from 'cojson'
-import { useEffect, useState } from 'preact/hooks'
-import { localAuthSignals } from '../src/index.jsx'
+import { LocalNode, CoID, CoMap } from 'cojson'
+import { useCallback, useEffect, useState } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
+import { Signal, effect, signal, useSignal } from '@preact/signals'
+import { localAuthSignals, AuthStatus } from '../src/index.jsx'
+import { AuthLocal } from './auth-local.jsx'
+import './todo-app.css'
 
 type TaskContent = { done: boolean; text: string };
 type Task = CoMap<TaskContent>;
@@ -12,31 +15,53 @@ type TodoListContent = {
 }
 type TodoList = CoMap<TodoListContent>
 
-export function TodoApp ({ appName, syncAddress }:{
+export function TodoApp ({ appName, syncAddress, appHostName }:{
     appName:string,
-    syncAddress?:string
+    syncAddress?:string,
+    appHostName?:string
 }):FunctionComponent<{
     appName:string
     syncAddress?:string
+    appHostName:string
 }> {
-    const { authStatus, localNode } = localAuthSignals(appName, undefined, {
-        syncAddress
-    })
+    // const { authStatus, localNode } = localAuthSignals(appName, undefined, {
+    //     syncAddress
+    // })
+
+    // let authStatus:Signal<AuthStatus|null> = signal(null)
+    // let localNode:Signal<LocalNode|null> = signal(null)
+    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
+
+    useCallback(() => {
+        const res = localAuthSignals(appName, appHostName, {
+            syncAddress
+        })
+        authStatus = res.authStatus
+        localNode = res.localNode
+    }, [appName, appHostName, syncAddress])
+
+    // const authStatus:Signal<AuthStatus> = useSignal({ status: null })
+    // const localNode:Signal<LocalNode|null> = useSignal(null)
+    // const { authStatus, localNode } = localAuthSignals(appName, appHostName, {
+    //     syncAddress
+    // })
 
     const [listId, setListId] = useState<CoID<TodoList>>()
 
+    localAuthSignals(appName, undefined, {
+        syncAddress,
+    })
+
     console.log('render', authStatus.value, localNode.value)
 
-    useEffect(() => {
-        console.log('status', authStatus.value)
-    }, [authStatus.value.status])
+    effect(() => {
+        console.log('aaaaa', authStatus.value)
+    })
 
     useEffect(() => {
         if (!localNode.value) return
-        console.log('use effect called')
-
-        listener()
         window.addEventListener('hashchange', listener)
+        listener()
 
         async function listener () {
             console.log('hash change', localNode.value)
@@ -58,243 +83,28 @@ export function TodoApp ({ appName, syncAddress }:{
         }
     }, [localNode.value])
 
-    return (<div>
-        hello
-        {listId ?
-            (<div>list id {listId}</div>) :
-            null
-        }
+    const signedIn = isSignedIn(authStatus, localNode)
 
-        {authStatus.value.status === 'loading' ?
-            <div>is loading</div> :
-            <div>not loading</div>
-        }
+    return (<div className={signedIn ? 'signed-in' : 'not-signed-in'}>
+        <h1>{appName}</h1>
 
-        {authStatus.value.status === 'ready' ?
-            <div>ready</div> :
-            <div>not ready</div>
-        }
-
-        {authStatus.value.status === 'signedIn' ?
-            <div>signed in already</div> :
-            <div>not signed in</div>
+        {isSignedIn(authStatus, localNode) ?
+            <div>signed in</div> :
+            (<span>
+                <AuthLocal
+                    isResolving={(!!authStatus.value &&
+                        authStatus.value.status === 'loading')}
+                    authStatus={authStatus}
+                />
+            </span>)
         }
     </div>)
 }
 
-// import { FunctionComponent } from 'preact'
-// import { useEffect, useState } from 'preact/hooks'
-// import {
-//     consumeInviteLinkFromWindowLocation,
-//     createBrowserNode
-// } from 'jazz-browser'
-// import { useSignal } from '@preact/signals'
-// import { PreactAuthHook } from '../src/auth-local.js'
-
-// // import {
-// //     LocalNode,
-// //     ContentType,
-// //     CoID,
-// //     ProfileContent,
-// //     CoMap,
-// //     AccountID,
-// //     Profile,
-// // } from 'cojson'
-
-// import { CoMap, CoID, LocalNode } from 'cojson'
-
-// type TaskContent = { done: boolean; text: string };
-// type Task = CoMap<TaskContent>;
-// type TodoListContent = {
-//     title: string;
-//     // other keys form a set of task IDs
-//     [taskId: CoID<Task>]: true;
-// }
-// type TodoList = CoMap<TodoListContent>
-
-// // export type AuthHook = () => {
-// //     auth: AuthProvider;
-// //     AuthUI:AnyComponent;
-// //     logOut?: () => void;
-// // }
-
-// //
-// // need to get localNode, it's used by `useTelepathicState`
-// //  `localNode` is returned by `useJazz`
-// //   `useJazz` returns the JazzContext
-// //
-// // localNode type is imported from `cojson`
-// //
-
-// /**
-//  * type JazzContext = {
-//         localNode: LocalNode;
-//         logOut: () => void;
-//     };
-//  */
-
-// /**
-//  * `node` is originally set in a `useEffect` call
-//  *   that depends on `[auth, syncAddress]`
-//  * (it's just set as component state)
-//  *
-//  * we get `auth` from the call to `WithJazz` -- it's passed as a parameter
-//  *   in the example we pass it { auth: reactJazzLocalAuth }
-//  */
-
-// /**
-//  * `WithJazz` makes a call to `useEffect`, and in that call, we set
-//  * a state object `node`
-//  *
-//  * Then we call `useJazz`, and it returns the `localNode` that was
-//  * set by `WithJazz`.
-//  *
-//  * `WithJazz` sets the `value` in the context
-//  *   `<JazzContext.Provider value={{ localNode: node, logOut }}>`
-//  */
-
-// export const TodoApp:FunctionComponent<{
-//     syncAddress?:string,
-//     auth:PreactAuthHook,
-// }> = function App ({ syncAddress, auth: authHook }) {
-//     const [listId, setListId] = useState<CoID<TodoList>>()
-//     // local node is set in the example by the `WithJazz` context
-//     const localNode = useSignal<LocalNode|null>(null)
-
-//     const { auth, logOut } = authHook()
-
-//     useEffect(() => {
-//         let done: (() => void) | undefined
-
-//         (async () => {
-//             const nodeHandle = await createBrowserNode({
-//                 auth,
-//                 syncAddress,
-//             })
-
-//             setNode(nodeHandle.node)
-
-//             done = nodeHandle.done
-//         })().catch((e) => {
-//             console.log('Failed to create browser node', e)
-//         })
-
-//         return () => {
-//             done && done()
-//         }
-//     }, [auth, syncAddress])
-
-//     useEffect(() => {
-//         if (!localNode.value) return
-//         const listener = async () => {
-//             if (!localNode.value) return
-
-//             const acceptedInvitation =
-//                 await consumeInviteLinkFromWindowLocation(localNode.value)
-
-//             if (acceptedInvitation) {
-//                 setListId(acceptedInvitation.valueID as CoID<TodoList>)
-//                 window.location.hash = acceptedInvitation.valueID
-//                 return
-//             }
-
-//             setListId(window.location.hash.slice(1) as CoID<TodoList>)
-//         }
-//         window.addEventListener('hashchange', listener)
-//         listener()
-
-//         return () => window.removeEventListener('hashchange', listener)
-//     }, [localNode.value])
-
-//     return (<div className="todo-list">
-//         {listId ? (
-//             <TodoListComponent listId={listId} />
-//         ) : (
-//             <SubmittableInput
-//                 onSubmit={createList}
-//                 label="Create New List"
-//                 placeholder="New list title"
-//             />
-//         )}
-//         <Button
-//             onClick={() => {
-//                 window.location.hash = ''
-//                 logOut()
-//             }}
-//         >
-//             Log Out
-//         </Button>
-//     </div>)
-
-//     // return (<div>
-//     //     hello
-//     // </div>)
-// }
-
-// function TodoListComponent ({ listId }:{ listId: CoID<TodoList> }) {
-//     const list = useTelepathicState(listId)
-
-//     const createTask = (text: string) => {
-//         if (!list) return
-//         const task = list.coValue.getGroup().createMap<TaskContent>()
-
-//         task.edit((task) => {
-//             task.set('text', text)
-//             task.set('done', false)
-//         })
-
-//         list.edit((list) => {
-//             list.set(task.id, true)
-//         })
-//     }
-
-//     return (
-//         <div className="max-w-full w-4xl">
-//             <div className="flex justify-between items-center gap-4 mb-4">
-//                 <h1>
-//                     {list?.get('title') ? (
-//                         <>
-//                             {list.get('title')}{' '}
-//                             <span className="text-sm">({list.id})</span>
-//                         </>
-//                     ) : (
-//                         <Skeleton className="mt-1 w-[200px] h-[1em] rounded-full" />
-//                     )}
-//                 </h1>
-//                 {list && <InviteButton list={list} />}
-//             </div>
-//             <Table>
-//                 <TableHeader>
-//                     <TableRow>
-//                         <TableHead className="w-[40px]">Done</TableHead>
-//                         <TableHead>Task</TableHead>
-//                     </TableRow>
-//                 </TableHeader>
-//                 <TableBody>
-//                     {list &&
-//                         list
-//                             .keys()
-//                             .filter((key): key is CoID<Task> =>
-//                                 key.startsWith('co_')
-//                             )
-//                             .map((taskId) => (
-//                                 <TaskRow key={taskId} taskId={taskId} />
-//                             ))}
-//                     <TableRow key="new">
-//                         <TableCell>
-//                             <Checkbox className="mt-1" disabled />
-//                         </TableCell>
-//                         <TableCell>
-//                             <SubmittableInput
-//                                 onSubmit={(taskText) => createTask(taskText)}
-//                                 label="Add"
-//                                 placeholder="New task"
-//                                 disabled={!list}
-//                             />
-//                         </TableCell>
-//                     </TableRow>
-//                 </TableBody>
-//             </Table>
-//         </div>
-//     )
-// }
+function isSignedIn (
+    authStatus:Signal<AuthStatus|null>,
+    localNode:Signal<LocalNode|null>
+) {
+    // @ts-ignore
+    return (localNode.value && authStatus.value.logOut)
+}

@@ -1,4 +1,4 @@
-import { LocalAuthComponent } from '../src/auth-local.js'
+import { LocalAuthComponent } from '../src/auth-local.jsx'
 import { useState } from 'preact/hooks'
 
 export const PrettyAuthComponent:LocalAuthComponent = ({
