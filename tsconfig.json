@@ -1,36 +1,28 @@
 {
   "compilerOptions": {
-    "listFiles": true,
-    "module": "ES2022",
-    "target": "ES2022",
-    "moduleResolution": "Node",
+    "module": "esnext",
+    "moduleResolution": "nodenext",
+    "target": "ES2020",
     "esModuleInterop": true,
-    "lib": ["ES2021", "DOM"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "allowJs": false,
-    "skipLibCheck": true,
-    "outDir": "dist",
+    "skipLibCheck": false,
     "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "strict": true,
-    "sourceMap": true,
+    "types": ["node", "vite/client"],
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noImplicitAny": false,
-    "declaration": true,
-    "declarationDir": "dist",
-    "declarationMap": true,
+    "noEmit": true,
     "jsx": "preserve",
     "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment"
+    "jsxFragmentFactory": "Fragment",
+    "noImplicitAny": false
   },
   "include": [
-    "src/**/*",
+    "example",
+    "src",
     "test",
     "lib.es5.d.ts"
-  ],
-  "exclude": [
-    "test/*.ts"
   ]
 }

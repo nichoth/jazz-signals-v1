@@ -8,7 +8,7 @@ export default defineConfig({
     define: {
         global: 'globalThis'
     },
-    root: 'src',
+    root: 'example',
     plugins: [
         preact({
             devtoolsInProd: false,
