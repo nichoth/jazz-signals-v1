@@ -63,18 +63,17 @@ export function LocalAuth ({
             )
         }, [appName, appHostname, logOutCounter])
 
-        const AuthUI =
-            authState.state === 'ready'
-                ? Component({
-                    loading: false,
-                    logIn: authState.logIn,
-                    signUp: authState.signUp,
-                })
-                : Component({
-                    loading: false,
-                    logIn: () => {},
-                    signUp: (_) => {},
-                })
+        const AuthUI = (authState.state === 'ready' ?
+            Component({
+                loading: false,
+                logIn: authState.logIn,
+                signUp: authState.signUp,
+            }) :
+            Component({
+                loading: false,
+                logIn: () => {},
+                signUp: () => {},
+            }))
 
         return {
             auth,
@@ -88,7 +87,7 @@ export function LocalAuth ({
 const LocalAuthBasicUI = ({
     logIn,
     signUp,
-}: {
+}:{
     logIn: () => void;
     signUp: (username: string) => void;
 }) => {

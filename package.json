@@ -46,5 +46,12 @@
       ]
     }
   },
+  "standardx": {
+    "global": [
+      "chrome",
+      "muon",
+      "postMessage"
+    ]
+  },
   "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)"
 }

@@ -16,28 +16,30 @@ export const PrettyAuthComponent:LocalAuthComponent = ({
                 <form
                     className="w-72 flex flex-col gap-2"
                     onSubmit={(e) => {
-                        e.preventDefault();
-                        signUp(username);
+                        e.preventDefault()
+                        signUp(username)
                     }}
                 >
-                    <Input
+
+                    <input
                         placeholder="Display name"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         autoComplete="webauthn"
                         className="text-base"
                     />
-                    <Button asChild>
-                        <Input
+                    <button asChild>
+                        <input
                             type="submit"
                             value="Sign Up as new account"
                         />
-                    </Button>
+                    </button>
                 </form>
-                <Button onClick={logIn}>
+
+                <button onClick={logIn}>
                     Log In with existing account
-                </Button>
+                </button>
             </div>
         )}
     </div>)
-};
+}
