@@ -29,16 +29,15 @@ export function TodoApp ({ appName, syncAddress, appHostName }:{
     // })
 
     // let authStatus:Signal<AuthStatus|null> = signal(null)
-    const localNode:Signal<LocalNode|null> = signal(null)
-    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
+    let localNode:Signal<LocalNode|null> = signal(null)
+    let authStatus:Signal<AuthStatus|null> = signal(null)
 
     useCallback(async () => {
         const res = await localAuth(appName, appHostName, {
-            authStatus,
             syncAddress
         })
-        // authStatus = res.authStatus
-        localNode.value = res.localNode
+        authStatus = res.authStatus
+        localNode = res.localNode
     }, [appName, appHostName, syncAddress])
 
     // const authStatus:Signal<AuthStatus> = useSignal({ status: null })

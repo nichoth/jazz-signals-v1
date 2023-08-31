@@ -48,20 +48,17 @@ export type AuthStatus = { status: null } |
  * Fills the place of `useJazz` in the react example.
  * Use this to get a `localNode`.
  */
-export async function localAuth (appName:string, appHostname:string|undefined, opts:{
-    authStatus:Signal<AuthStatus>// = signal({ status: null })
-    // localNode:Signal<LocalNode|null>// = signal(null)
-    // const localNode:Signal<LocalNode|null> = signal(null)
+export function localAuth (appName:string, appHostname:string|undefined, opts:{
     syncAddress?:string;
-}):Promise<{
-    // authStatus:AuthStatus;
-    localNode:LocalNode;
-}> {
-    // const authStatus:Signal<AuthStatus> = signal({ status: null })
-    // const localNode:Signal<LocalNode|null> = signal(null)
+}):{
+    authStatus:Signal<AuthStatus>;
+    localNode:Signal<LocalNode|null>;
+} {
+    const authStatus:Signal<AuthStatus> = signal({ status: null })
+    const localNode:Signal<LocalNode|null> = signal(null)
     // const authStatus:Signal<AuthStatus> = useSignal({ status: null })
     // const localNode:Signal<LocalNode|null> = useSignal(null)
-    const { authStatus } = opts
+    // const { authStatus } = opts
     const logoutCount:Signal<number> = signal(0)
     const { syncAddress } = (opts || {})
 
@@ -100,21 +97,14 @@ export async function localAuth (appName:string, appHostname:string|undefined, o
 
     console.log('local auth', localAuth)
 
-    const nodeHandle = await createBrowserNode({
+    createBrowserNode({
         auth: localAuth,
         syncAddress
+    }).then(nodeHandle => {
+        localNode.value = nodeHandle.node
+    }).catch(err => {
+        console.log('errrrrrrrrrr', err)
     })
 
-    // createBrowserNode({
-    //     auth: localAuth,
-    //     syncAddress
-    // }).then(nodeHandle => {
-    //     localNode.value = nodeHandle.node
-    // }).catch(err => {
-    //     console.log('errrrrrrrrrr', err)
-    // })
-
-    console.log('local node', nodeHandle.node)
-
-    return { localNode: nodeHandle.node }
+    return { localNode, authStatus }
 }
