@@ -1,8 +1,8 @@
 import { FunctionComponent } from 'preact'
 import { LocalNode, CoID, CoMap } from 'cojson'
-import { useCallback, useEffect, useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
-import { Signal, effect, signal, useSignal } from '@preact/signals'
+import { Signal, useSignal } from '@preact/signals'
 import { localAuth, AuthStatus } from '../src/index.jsx'
 import { AuthLocal } from './auth-local.jsx'
 import './todo-app.css'
@@ -24,39 +24,20 @@ export function TodoApp ({ appName, syncAddress, appHostName }:{
     syncAddress?:string
     appHostName:string
 }> {
-    // const { authStatus, localNode } = localAuthSignals(appName, undefined, {
-    //     syncAddress
-    // })
+    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
+    const localNode:Signal<LocalNode|null> = useSignal(null)
 
-    // let authStatus:Signal<AuthStatus|null> = signal(null)
-    let localNode:Signal<LocalNode|null> = signal(null)
-    let authStatus:Signal<AuthStatus|null> = signal(null)
-
-    useCallback(async () => {
-        const res = await localAuth(appName, appHostName, {
-            syncAddress
+    useEffect(() => {
+        localAuth(appName, appHostName, {
+            authStatus,
+            localNode,
+            syncAddress,
         })
-        authStatus = res.authStatus
-        localNode = res.localNode
     }, [appName, appHostName, syncAddress])
-
-    // const authStatus:Signal<AuthStatus> = useSignal({ status: null })
-    // const localNode:Signal<LocalNode|null> = useSignal(null)
-    // const { authStatus, localNode } = localAuthSignals(appName, appHostName, {
-    //     syncAddress
-    // })
 
     const [listId, setListId] = useState<CoID<TodoList>>()
 
-    // localAuthSignals(appName, undefined, {
-    //     syncAddress,
-    // })
-
     console.log('render', authStatus.value, localNode.value)
-
-    effect(() => {
-        console.log('aaaaa', authStatus.value)
-    })
 
     useEffect(() => {
         if (!localNode.value) return

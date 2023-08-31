@@ -2,7 +2,7 @@ import {
     createBrowserNode
 } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { useMemo } from 'preact/hooks'
+// import { useMemo } from 'preact/hooks'
 import { signal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
@@ -49,51 +49,42 @@ export type AuthStatus = { status: null } |
  * Use this to get a `localNode`.
  */
 export function localAuth (appName:string, appHostname:string|undefined, opts:{
+    authStatus:Signal<AuthStatus>;
+    localNode:Signal<LocalNode|null>;
     syncAddress?:string;
 }):{
     authStatus:Signal<AuthStatus>;
     localNode:Signal<LocalNode|null>;
 } {
-    const authStatus:Signal<AuthStatus> = signal({ status: null })
-    const localNode:Signal<LocalNode|null> = signal(null)
-    // const authStatus:Signal<AuthStatus> = useSignal({ status: null })
-    // const localNode:Signal<LocalNode|null> = useSignal(null)
-    // const { authStatus } = opts
+    const { syncAddress, localNode, authStatus } = opts
     const logoutCount:Signal<number> = signal(0)
-    const { syncAddress } = (opts || {})
 
-    // @ts-ignore
-    window.authStatus = authStatus
-
-    const localAuth = useMemo(() => {
-        return new BrowserLocalAuth(
-            {
-                onReady (next) {
-                    console.log('on ready, status...', authStatus.value)
-                    authStatus.value = {
-                        status: 'ready',
-                        logIn: next.logIn,
-                        signUp: next.signUp,
-                    }
-                },
-
-                onSignedIn (next) {
-                    console.log('signed in', authStatus.value)
-                    authStatus.value = {
-                        status: 'signedIn',
-                        logOut: () => {
-                            next.logOut()
-                            authStatus.value = { status: 'loading' }
-                            logoutCount.value = (logoutCount.value + 1)
-                        },
-                    }
-                },
+    const localAuth = new BrowserLocalAuth(
+        {
+            onReady (next) {
+                console.log('on ready, status...', authStatus.value)
+                authStatus.value = {
+                    status: 'ready',
+                    logIn: next.logIn,
+                    signUp: next.signUp,
+                }
             },
 
-            appName,
-            appHostname
-        )
-    }, [appName, appHostname, logoutCount.value])
+            onSignedIn (next) {
+                console.log('signed in', authStatus.value)
+                authStatus.value = {
+                    status: 'signedIn',
+                    logOut: () => {
+                        next.logOut()
+                        authStatus.value = { status: 'loading' }
+                        logoutCount.value = (logoutCount.value + 1)
+                    },
+                }
+            },
+        },
+        appName,
+        appHostname
+    )
 
     console.log('local auth', localAuth)
 
