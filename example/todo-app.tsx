@@ -15,10 +15,10 @@ type TodoListContent = {
 }
 type TodoList = CoMap<TodoListContent>
 
-export function TodoApp ({ appName, syncAddress, appHostName }:{
-    appName:string,
-    syncAddress?:string,
-    appHostName?:string
+export function TodoApp ({
+    appName,
+    syncAddress,
+    appHostName
 }):FunctionComponent<{
     appName:string
     syncAddress?:string
