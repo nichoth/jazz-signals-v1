@@ -66,5 +66,7 @@ function MyPreactComponent ({ appName, syncAddress, appHostName }) {
 
         return done
     }, [appName, appHostName, syncAddress, logoutCount.value])
+
+    // ...
 }
 ```
