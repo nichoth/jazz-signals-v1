@@ -1,7 +1,4 @@
 # template jazz signals
 
-An example of Jazz + preact signals.
+An example of [Jazz](https://jazz.tools/) + [preact signals](https://preactjs.com/blog/introducing-signals/).
 
-------
-
-Should setup a signal that connects all the dependencies for you. 
