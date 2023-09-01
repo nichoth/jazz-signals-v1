@@ -3,7 +3,7 @@ import { Signal } from '@preact/signals'
 import { useState } from 'preact/hooks'
 import { Button } from './components/button.jsx'
 import { TextInput } from './components/text-input.jsx'
-import { AuthStatus } from '../src/index.jsx'
+import { AuthStatus, ReadyStatus } from '../src/index.jsx'
 import './components/button.css'
 import './components/text-input.css'
 import './login.css'
@@ -59,17 +59,15 @@ export function Login ({ authStatus }:{
             if (!type) return
 
             if (type === 'login') {
-                // @ts-ignore
-                await authStatus.value.logIn()
+                await (authStatus.value as ReadyStatus).logIn()
             }
+
             // type must be 'create'
             // get the username
-            const username = ((ev.target! as HTMLButtonElement).form!.elements
-                // @ts-ignore
-                .username.value)
+            const username = ((ev.target as HTMLButtonElement).form!.elements
+                .namedItem('username')! as HTMLInputElement).value
 
-            // @ts-ignore
-            await authStatus.value.signUp(username)
+            await (authStatus.value as ReadyStatus).signUp(username)
         } catch (err) {
             console.log('errrrr', err)
         }
