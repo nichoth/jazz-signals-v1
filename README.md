@@ -14,7 +14,8 @@ npm start
 ```
 
 ## API
-A function `localAuth` that helps with authentication.
+Import a function `localAuth` that helps with authentication, and has a property `createState` that returns observable state.
+
 ```js
 import { localAuth } from '@nichoth/jazz-signals'
 ```
