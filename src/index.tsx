@@ -48,8 +48,7 @@ export type AuthStatus = { status:null } |
  * Fills the place of `useJazz` in the react example.
  * Use this to get a `localNode`.
  *
- * No return value because we pass in the signals. This is a closure, mutates
- * the signal args.
+ * No return value because we pass in the signals and mutate their values.
  */
 export function localAuth (appName:string, appHostname:string|undefined, opts:{
     authStatus:Signal<AuthStatus>;
