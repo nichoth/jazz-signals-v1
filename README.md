@@ -14,7 +14,7 @@ See an example of an application that consumes this package in the `example` dir
 ## API
 
 ### localAuth
-This exposes a function `localAuth` that handles authentication.
+A function `localAuth` that handles authentication.
 
 ```js
 import { localAuth } from '@nichoth/jazz-signals'
