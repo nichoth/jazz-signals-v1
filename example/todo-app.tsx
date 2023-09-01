@@ -2,8 +2,8 @@ import { FunctionComponent } from 'preact'
 import { LocalNode, CoID, CoMap } from 'cojson'
 import { useEffect, useState } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
-import { Signal, useSignal } from '@preact/signals'
-import { localAuth, AuthStatus } from '../src/index.jsx'
+import { Signal } from '@preact/signals'
+import { localAuth, AuthStatus, SignedInStatus } from '../src/index.jsx'
 import { Login } from './login.jsx'
 import './todo-app.css'
 
@@ -24,8 +24,7 @@ export function TodoApp ({
     syncAddress?:string,
     appHostName?:string
 }):FunctionComponent {
-    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
-    const localNode:Signal<LocalNode|null> = useSignal(null)
+    const { authStatus, localNode, logoutCount } = localAuth.createState()
 
     // @ts-ignore
     window.authStatus = authStatus
@@ -34,11 +33,12 @@ export function TodoApp ({
         const done = localAuth(appName, appHostName, {
             authStatus,
             localNode,
-            syncAddress,
+            logoutCount,
+            syncAddress
         })
 
         return done
-    }, [appName, appHostName, syncAddress])
+    }, [appName, appHostName, syncAddress, logoutCount.value])
 
     const [listId, setListId] = useState<CoID<TodoList>>()
 
@@ -73,9 +73,8 @@ export function TodoApp ({
 
     function logout (ev) {
         ev.preventDefault()
-        console.log('logout')
-        // @ts-ignore
-        authStatus.value.logOut()
+        console.log('logout');
+        (authStatus.value as SignedInStatus).logOut()
     }
 
     return (<div className={signedIn ? 'signed-in' : 'not-signed-in'}>

@@ -1,13 +1,13 @@
 import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { signal, Signal } from '@preact/signals'
+import { useSignal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
 export async function telepathicSignal<T extends ContentType> (
     localNode:LocalNode,
     id?: CoID<T>
 ):Promise<Signal<T|null>> {
-    const state = signal<T|null>(null)
+    const state = useSignal<T|null>(null)
     if (!id) return state
 
     let node
@@ -51,13 +51,13 @@ export type AuthStatus = { status:null } |
  * We pass in the signals and mutate their values, return a function
  * to unsubscribe
  */
-export function localAuth (appName:string, appHostname:string|undefined, opts:{
+function localAuth (appName:string, appHostname:string|undefined, opts:{
     authStatus:Signal<AuthStatus>;
     localNode:Signal<LocalNode|null>;
+    logoutCount:Signal<number>;
     syncAddress?:string;
 }):() => void {
-    const { syncAddress, localNode, authStatus } = opts
-    const logoutCount:Signal<number> = signal(0)
+    const { syncAddress, localNode, authStatus, logoutCount } = opts
 
     const localAuthObj = new BrowserLocalAuth(
         {
@@ -103,3 +103,17 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
         _done()
     }
 }
+
+localAuth.createState = function ():{
+    authStatus:Signal<AuthStatus>;
+    localNode:Signal<LocalNode|null>;
+    logoutCount:Signal<number>;
+    } {
+    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
+    const localNode:Signal<LocalNode|null> = useSignal(null)
+    const logoutCount:Signal<number> = useSignal(0)
+
+    return { authStatus, localNode, logoutCount }
+}
+
+export { localAuth }
