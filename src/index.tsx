@@ -44,6 +44,13 @@ export type AuthStatus = { status:null } |
     ReadyStatus |
     SignedInStatus
 
+export interface LocalAuthState {
+    authStatus:Signal<AuthStatus>;
+    localNode:Signal<LocalNode|null>;
+    logoutCount:Signal<number>;
+    syncAddress?:string;
+}
+
 /**
  * Fills the place of `useJazz` in the react example.
  * Use this to get a `localNode`.
@@ -51,12 +58,9 @@ export type AuthStatus = { status:null } |
  * We pass in the signals and mutate their values, return a function
  * to unsubscribe
  */
-function localAuth (appName:string, appHostname:string|undefined, opts:{
-    authStatus:Signal<AuthStatus>;
-    localNode:Signal<LocalNode|null>;
-    logoutCount:Signal<number>;
-    syncAddress?:string;
-}):() => void {
+function localAuth (appName:string, appHostname:string|undefined,
+    opts:LocalAuthState)
+:() => void {
     const { syncAddress, localNode, authStatus, logoutCount } = opts
 
     const localAuthObj = new BrowserLocalAuth(
@@ -104,11 +108,7 @@ function localAuth (appName:string, appHostname:string|undefined, opts:{
     }
 }
 
-localAuth.createState = function ():{
-    authStatus:Signal<AuthStatus>;
-    localNode:Signal<LocalNode|null>;
-    logoutCount:Signal<number>;
-    } {
+localAuth.createState = function ():LocalAuthState {
     const authStatus:Signal<AuthStatus> = useSignal({ status: null })
     const localNode:Signal<LocalNode|null> = useSignal(null)
     const logoutCount:Signal<number> = useSignal(0)
