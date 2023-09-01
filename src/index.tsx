@@ -85,7 +85,7 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
         appHostname
     )
 
-    let _done: (() => void)|undefined
+    let _done:(() => void)|undefined
 
     createBrowserNode({
         auth: localAuthObj,
@@ -94,7 +94,7 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
         localNode.value = nodeHandle.node
         _done = nodeHandle.done
     }).catch(err => {
-        console.log('errrrrrrrrrr', err)
+        console.log('error creating browser node...', err)
     })
 
     return function done () {
