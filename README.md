@@ -39,7 +39,7 @@ function localAuth (appName:string, appHostname:string|undefined,
 This will create a new `BrowserLocalAuth`, and subscribe the passed in signals to its events. The return value is a function that will unsubscribe from the `BrowserLocalAuth`. See [the example](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L33) for a demonstration of how the unsubscribe function can be used.
 
 ## example
-See an example of an application that consumes this package in the [example](https://github.com/nichoth/jazz-signals/tree/main/example) directory.
+See an example of an application that consumes this package in the [example directory](https://github.com/nichoth/jazz-signals/tree/main/example).
 
 ```ts
 import { localAuth, AuthStatus, SignedInStatus } from '@nichoth/jazz-signals'
