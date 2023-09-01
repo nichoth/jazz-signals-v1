@@ -40,6 +40,7 @@ export function TodoApp ({
         return done
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
+    /* eslint-disable */
     const [listId, setListId] = useState<CoID<TodoList>>()
 
     console.log('render', authStatus.value, localNode.value)

@@ -10,8 +10,7 @@
     "lint": "standardx -v \"./**/*.tsx\"",
     "build-tests": "esbuild test/*.ts --platform=node --format=esm --outdir=test --keep-names",
     "test": "npm run build && npm run build-tests && NODE_ENV=test node ./test/index.js | tap-arc",
-    "build": "mkdir -p ./dist && rm -rf ./dist/* && tsc",
-    "build-es": "esbuild src/*.tsx --format=esm --outdir=dist --keep-names",
+    "build": "mkdir -p ./dist && rm -rf ./dist/* && tsc --project tsconfig.build.json",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
     "prepublishOnly": "npm run build"

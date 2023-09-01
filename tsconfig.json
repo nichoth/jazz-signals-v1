@@ -29,9 +29,5 @@
     "src",
     "test",
     "lib.es5.d.ts"
-  ],
-  "exclude": [
-    "example",
-    "test"
   ]
 }
