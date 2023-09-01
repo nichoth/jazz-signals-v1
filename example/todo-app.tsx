@@ -4,7 +4,7 @@ import { useEffect, useState } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Signal, useSignal } from '@preact/signals'
 import { localAuth, AuthStatus } from '../src/index.jsx'
-import { AuthLocal } from './auth-local.jsx'
+import { Login } from './login.jsx'
 import './todo-app.css'
 
 type TaskContent = { done: boolean; text: string };
@@ -27,7 +27,11 @@ export function TodoApp ({ appName, syncAddress, appHostName }:{
     const authStatus:Signal<AuthStatus> = useSignal({ status: null })
     const localNode:Signal<LocalNode|null> = useSignal(null)
 
+    // @ts-ignore
+    window.authStatus = authStatus
+
     useEffect(() => {
+        // no return value because we pass in the signals
         localAuth(appName, appHostName, {
             authStatus,
             localNode,
@@ -66,18 +70,24 @@ export function TodoApp ({ appName, syncAddress, appHostName }:{
 
     const signedIn = isSignedIn(authStatus, localNode)
 
+    function logout (ev) {
+        ev.preventDefault()
+        console.log('logout')
+        // @ts-ignore
+        authStatus.value.logOut()
+    }
+
     return (<div className={signedIn ? 'signed-in' : 'not-signed-in'}>
         <h1>{appName}</h1>
 
-        {isSignedIn(authStatus, localNode) ?
-            <div>signed in</div> :
-            (<span>
-                <AuthLocal
-                    isResolving={(!!authStatus.value &&
-                        authStatus.value.status === 'loading')}
-                    authStatus={authStatus}
-                />
-            </span>)
+        {signedIn ?
+            (<div>
+                signed in, this is the app
+                <div>
+                    <button onClick={logout}>logout</button>
+                </div>
+            </div>) :
+            (<Login authStatus={authStatus} />)
         }
     </div>)
 }
@@ -85,7 +95,7 @@ export function TodoApp ({ appName, syncAddress, appHostName }:{
 function isSignedIn (
     authStatus:Signal<AuthStatus|null>,
     localNode:Signal<LocalNode|null>
-) {
+):boolean {
     // @ts-ignore
     return (localNode.value && authStatus.value.logOut)
 }

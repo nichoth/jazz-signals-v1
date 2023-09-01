@@ -1,8 +1,5 @@
-import {
-    createBrowserNode
-} from 'jazz-browser'
+import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-// import { useMemo } from 'preact/hooks'
 import { signal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
@@ -62,7 +59,6 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
     const localAuth = new BrowserLocalAuth(
         {
             onReady (next) {
-                console.log('on ready, status...', authStatus.value)
                 authStatus.value = {
                     status: 'ready',
                     logIn: next.logIn,
@@ -82,6 +78,7 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
                 }
             },
         },
+
         appName,
         appHostname
     )

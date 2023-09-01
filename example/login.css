@@ -1,0 +1,10 @@
+#login-form {
+    width: max(25rem);
+    margin: 0 auto;
+}
+
+.controls {
+    .btn-wrapper {
+        margin-bottom: 1rem;
+    }
+}

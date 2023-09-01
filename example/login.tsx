@@ -1,25 +1,109 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
+import { useState } from 'preact/hooks'
+import { Button } from './components/button.jsx'
+import { TextInput } from './components/text-input.jsx'
 import { AuthStatus } from '../src/index.jsx'
+import './components/button.css'
+import './components/text-input.css'
+import './login.css'
 
-export function AuthLocal ({ isResolving, authStatus }:{
-    isResolving:boolean;
-    authStatus:Signal<AuthStatus|null>;
+/*
+   type AuthStatus = {
+        status: null;
+    } | {
+        status: 'loading';
+    } | {
+        status: 'ready';
+        logIn: () => void;
+        signUp: (username: string) => void;
+    } | {
+        status: 'signedIn';
+        logOut: () => void;
+    }
+ */
+
+export function Login ({ authStatus }:{
+    authStatus: Signal<AuthStatus|null>
 }):FunctionComponent {
-    console.log('authstatus', authStatus.value)
-    return (<div className="login">
-        {isResolving ?
-            <span>loading... </span> :
-            <span>not resolving</span>
-        }
+    const [isValid, setValid] = useState(false)
 
-        {(authStatus.value && authStatus.value.status) === 'ready' ?
-            <div>ready!</div> :
-            <div>not ready</div>
-        }
+    if (authStatus.value && authStatus.value.status === 'loading') {
+        return (<div className="loading">
+            loading...
+        </div>)
+    }
 
-        auth component
-    </div>)
+    // need this because `onInput` event doesnt work for cmd + delete event
+    async function onFormKeydown (ev:KeyboardEvent) {
+        const key = ev.key
+        const { form } = ev.target as HTMLInputElement
+        if (!form) return
+        if (key !== 'Backspace' && key !== 'Delete') return
+
+        const _isValid = (form.checkValidity())
+        if (_isValid !== isValid) setValid(_isValid)
+    }
+
+    function handleInput (ev) {
+        const { form } = ev.target as HTMLInputElement
+        const _isValid = (form as HTMLFormElement).checkValidity()
+        if (_isValid !== isValid) setValid(_isValid)
+    }
+
+    async function handleFormClick (ev:MouseEvent) {
+        ev.preventDefault()
+
+        try {
+            const { type } = (ev.target as HTMLButtonElement).dataset
+            if (!type) return
+
+            if (type === 'login') {
+                // @ts-ignore
+                await authStatus.value.logIn()
+            }
+            // type must be 'create'
+            // get the username
+            const username = ((ev.target! as HTMLButtonElement).form!.elements
+                // @ts-ignore
+                .username.value)
+
+            // @ts-ignore
+            await authStatus.value.signUp(username)
+        } catch (err) {
+            console.log('errrrr', err)
+        }
+    }
+
+    return (authStatus.value && authStatus.value.status === 'ready') ?
+        (<div className="ready">
+            <form id="login-form" onInput={handleInput}
+                onClick={handleFormClick}
+                onKeydown={onFormKeydown}
+            >
+                <TextInput minLength={3} displayName="Display name"
+                    name="username"
+                    required={true}
+                    autoComplete="webauthn"
+                />
+                <div className="control">
+                    <Button isSpinning={false}
+                        data-type="create"
+                        disabled={!isValid}
+                    >
+                        Create a new account
+                    </Button>
+                </div>
+                <div className="control">
+                    <Button isSpinning={false} disabled={false}
+                        data-type="login"
+                    >
+                        Login with an existing account
+                    </Button>
+                </div>
+            </form>
+        </div>) :
+        null
 }
 
 // import { AnyComponent } from 'preact'
