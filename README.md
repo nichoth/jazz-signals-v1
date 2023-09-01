@@ -38,8 +38,11 @@ The returned state object should be passed into the `localAuth` function. See an
 
 ### localAuth
 ```ts
-function localAuth (appName:string, appHostname:string|undefined,
-    opts:LocalAuthState):() => void
+function localAuth (
+    appName:string,
+    appHostname:string|undefined,
+    opts:LocalAuthState
+):() => void
 ```
 
 This will create a new `BrowserLocalAuth`, and subscribe the passed in signals to its events. The return value is a function that will unsubscribe from the `BrowserLocalAuth`. See [the example](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L33) for a demonstration of how the unsubscribe function can be used.
