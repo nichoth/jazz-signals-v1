@@ -1,28 +1,37 @@
 {
   "compilerOptions": {
-    "module": "esnext",
+    "module": "NodeNext",
     "moduleResolution": "nodenext",
+    "outDir": "dist",
     "target": "ES2020",
     "esModuleInterop": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowJs": false,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["node", "vite/client"],
+    "types": ["vite/client"],
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "noEmit": false,
     "jsx": "preserve",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationDir": "dist",
+    "declarationMap": true
   },
   "include": [
     "example",
     "src",
     "test",
     "lib.es5.d.ts"
+  ],
+  "exclude": [
+    "example",
+    "test"
   ]
 }

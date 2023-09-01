@@ -44,3 +44,21 @@ function localAuth (appName:string, appHostname:string|undefined,
 
 This will create a new `BrowserLocalAuth`, and subscribe the passed in signals to its events. The return value is a function that will unsubscribe from the `BrowserLocalAuth`. See [the example](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L33) for a demonstration of how the unsubscribe function can be used.
 
+```ts
+import { localAuth, AuthStatus, SignedInStatus } from '@nichoth/jazz-signals'
+
+function MyPreactComponent ({ appName, syncAddress, appHostName }) {
+    const { authStatus, localNode, logoutCount } = localAuth.createState()
+
+    useEffect(() => {
+        const done = localAuth(appName, appHostName, {
+            authStatus,
+            localNode,
+            logoutCount,
+            syncAddress
+        })
+
+        return done
+    }, [appName, appHostName, syncAddress, logoutCount.value])
+}
+```

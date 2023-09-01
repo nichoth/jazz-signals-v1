@@ -7,4 +7,3 @@ test/index.d.ts*
 dist
 .env
 public
-

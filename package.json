@@ -1,4 +1,6 @@
 {
+  "name": "@nichoth/jazz-signals",
+  "description": "An example of [Jazz](https://jazz.tools/) + [preact signals](https://preactjs.com/blog/introducing-signals/).",
   "type": "module",
   "private": true,
   "version": "0.0.0",
@@ -8,7 +10,8 @@
     "lint": "standardx -v \"./**/*.tsx\"",
     "build-tests": "esbuild test/*.ts --platform=node --format=esm --outdir=test --keep-names",
     "test": "npm run build && npm run build-tests && NODE_ENV=test node ./test/index.js | tap-arc",
-    "build": "vite build",
+    "build": "mkdir -p ./dist && rm -rf ./dist/* && tsc",
+    "build-es": "esbuild src/*.tsx --format=esm --outdir=dist --keep-names",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
     "prepublishOnly": "npm run build"
@@ -32,26 +35,33 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.jsx"
     },
     "./*": {
       "import": [
-        "./dist/*.js",
-        "./dist/*"
-      ],
-      "require": [
-        "./dist/*.cjs",
+        "./dist/*.jsx",
         "./dist/*"
       ]
     }
   },
-  "standardx": {
-    "global": [
-      "chrome",
-      "muon",
-      "postMessage"
-    ]
+  "directories": {
+    "doc": "docs",
+    "example": "example",
+    "test": "test"
   },
-  "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)"
+  "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nichoth/jazz-signals.git"
+  },
+  "keywords": [
+    "jazz",
+    "preact",
+    "signals"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nichoth/jazz-signals/issues"
+  },
+  "homepage": "https://github.com/nichoth/jazz-signals#readme"
 }

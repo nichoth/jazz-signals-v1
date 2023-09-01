@@ -1,7 +1,11 @@
-import { LocalAuthComponent } from '../src/auth-local.jsx'
+import { FunctionComponent } from 'preact'
 import { useState } from 'preact/hooks'
 
-export const PrettyAuthComponent:LocalAuthComponent = ({
+export const PrettyAuthComponent:FunctionComponent<{
+    loading:boolean;
+    logIn:() => void;
+    signUp:(username:string) => void
+}> = ({
     loading,
     logIn,
     signUp,
