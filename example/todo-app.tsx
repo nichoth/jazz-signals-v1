@@ -29,6 +29,7 @@ export function TodoApp ({
     // @ts-ignore
     window.authStatus = authStatus
 
+    // instantiate a local node & authenticate
     useEffect(() => {
         const done = localAuth(appName, appHostName, {
             authStatus,
