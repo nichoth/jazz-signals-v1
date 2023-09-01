@@ -96,6 +96,5 @@ function isSignedIn (
     authStatus:Signal<AuthStatus>,
     localNode:Signal<LocalNode|null>
 ):boolean {
-    // @ts-ignore
-    return (localNode.value && authStatus.value.logOut)
+    return (!!localNode.value && !!(authStatus.value as SignedInStatus).logOut)
 }
