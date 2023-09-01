@@ -54,11 +54,11 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
     authStatus:Signal<AuthStatus>;
     localNode:Signal<LocalNode|null>;
     syncAddress?:string;
-}):void {
+}):() => void {
     const { syncAddress, localNode, authStatus } = opts
     const logoutCount:Signal<number> = signal(0)
 
-    const localAuth = new BrowserLocalAuth(
+    const localAuthObj = new BrowserLocalAuth(
         {
             onReady (next) {
                 authStatus.value = {
@@ -85,14 +85,21 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
         appHostname
     )
 
-    console.log('local auth', localAuth)
+    console.log('local auth', localAuthObj)
+
+    let _done: (() => void)|undefined
 
     createBrowserNode({
-        auth: localAuth,
+        auth: localAuthObj,
         syncAddress
     }).then(nodeHandle => {
         localNode.value = nodeHandle.node
+        _done = nodeHandle.done
     }).catch(err => {
         console.log('errrrrrrrrrr', err)
     })
+
+    return function done () {
+        _done && _done()
+    }
 }

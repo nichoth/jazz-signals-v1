@@ -32,11 +32,13 @@ export function TodoApp ({
 
     useEffect(() => {
         // no return value because we pass in the signals
-        localAuth(appName, appHostName, {
+        const done = localAuth(appName, appHostName, {
             authStatus,
             localNode,
             syncAddress,
         })
+
+        return done
     }, [appName, appHostName, syncAddress])
 
     const [listId, setListId] = useState<CoID<TodoList>>()
