@@ -94,7 +94,7 @@ export function TodoApp ({
 }
 
 function isSignedIn (
-    authStatus:Signal<AuthStatus|null>,
+    authStatus:Signal<AuthStatus>,
     localNode:Signal<LocalNode|null>
 ):boolean {
     // @ts-ignore
