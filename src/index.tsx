@@ -85,8 +85,6 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
         appHostname
     )
 
-    console.log('local auth', localAuthObj)
-
     let _done: (() => void)|undefined
 
     createBrowserNode({
@@ -100,6 +98,7 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
     })
 
     return function done () {
-        _done && _done()
+        if (!_done) throw new Error('Called `done` before it exists')
+        _done()
     }
 }
