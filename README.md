@@ -9,3 +9,5 @@ Start a local vite server
 npm start
 ```
 
+## example
+See an example of an application that consumes this package in the `example` directory.
