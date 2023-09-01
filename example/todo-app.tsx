@@ -31,7 +31,6 @@ export function TodoApp ({
     window.authStatus = authStatus
 
     useEffect(() => {
-        // no return value because we pass in the signals
         const done = localAuth(appName, appHostName, {
             authStatus,
             localNode,
