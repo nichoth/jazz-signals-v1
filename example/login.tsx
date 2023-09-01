@@ -59,7 +59,7 @@ export function Login ({ authStatus }:{
             if (!type) return
 
             if (type === 'login') {
-                await (authStatus.value as ReadyStatus).logIn()
+                return await (authStatus.value as ReadyStatus).logIn()
             }
 
             // type must be 'create'
