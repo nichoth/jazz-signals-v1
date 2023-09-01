@@ -12,10 +12,7 @@ npm start
 See an example of an application that consumes this package in the `example` directory.
 
 ## API
-
-### localAuth
-A function `localAuth` that handles authentication.
-
+A function `localAuth` that helps with authentication.
 ```js
 import { localAuth } from '@nichoth/jazz-signals'
 ```
