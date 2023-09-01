@@ -65,7 +65,7 @@ export function Login ({ authStatus }:{
             // type must be 'create'
             // get the username
             const username = ((ev.target as HTMLButtonElement).form!.elements
-                .namedItem('username')! as HTMLInputElement).value
+                .namedItem('username') as HTMLInputElement).value
 
             await (authStatus.value as ReadyStatus).signUp(username)
         } catch (err) {
