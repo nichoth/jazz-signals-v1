@@ -17,7 +17,7 @@ See an example of an application that consumes this package in the `example` dir
 This exposes a function `localAuth` that handles authentication.
 
 ```js
-import { localAuth } from '../src/index.jsx'
+import { localAuth } from '@nichoth/jazz-signals'
 ```
 
 ### localAuth.createState
