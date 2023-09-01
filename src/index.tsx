@@ -29,30 +29,33 @@ export async function telepathicSignal<T extends ContentType> (
     return state
 }
 
-export type AuthStatus = { status: null } |
-    ({ status: 'loading' } |
-    {
-        status: 'ready';
-        logIn: () => void;
-        signUp: (username: string) => void;
-    } |
-    {
-        status: 'signedIn';
-        logOut: () => void;
-    })
+export type LoadingStatus = { status: 'loading' }
+export type ReadyStatus = {
+    status: 'ready';
+    logIn: () => void;
+    signUp: (username:string) => void;
+}
+export type SignedInStatus = {
+    status: 'signedIn';
+    logOut: () => void;
+}
+export type AuthStatus = { status:null } |
+    LoadingStatus |
+    ReadyStatus |
+    SignedInStatus
 
 /**
  * Fills the place of `useJazz` in the react example.
  * Use this to get a `localNode`.
+ *
+ * No return value because we pass in the signals. This is a closure, mutates
+ * the signal args.
  */
 export function localAuth (appName:string, appHostname:string|undefined, opts:{
     authStatus:Signal<AuthStatus>;
     localNode:Signal<LocalNode|null>;
     syncAddress?:string;
-}):{
-    authStatus:Signal<AuthStatus>;
-    localNode:Signal<LocalNode|null>;
-} {
+}):void {
     const { syncAddress, localNode, authStatus } = opts
     const logoutCount:Signal<number> = signal(0)
 
@@ -93,6 +96,4 @@ export function localAuth (appName:string, appHostname:string|undefined, opts:{
     }).catch(err => {
         console.log('errrrrrrrrrr', err)
     })
-
-    return { localNode, authStatus }
 }
