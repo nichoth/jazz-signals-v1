@@ -1,5 +1,5 @@
 # jazz signals
-An example of [Jazz](https://jazz.tools/) + [preact signals](https://preactjs.com/blog/introducing-signals/).
+A library to help use [Jazz](https://jazz.tools/) with [preact signals](https://preactjs.com/blog/introducing-signals/).
 
 ## develop
 Start a local vite server
