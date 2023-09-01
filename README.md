@@ -1,6 +1,11 @@
 # jazz signals
 A library to help use [Jazz](https://jazz.tools/) with [preact signals](https://preactjs.com/blog/introducing-signals/).
 
+## install
+```bash
+npm i -S @nichoth/jazz-signals
+```
+
 ## develop
 Start a local vite server
 
