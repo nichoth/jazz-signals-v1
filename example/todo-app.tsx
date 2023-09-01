@@ -19,11 +19,11 @@ export function TodoApp ({
     appName,
     syncAddress,
     appHostName
-}):FunctionComponent<{
-    appName:string
-    syncAddress?:string
-    appHostName:string
-}> {
+}:{
+    appName:string,
+    syncAddress?:string,
+    appHostName?:string
+}):FunctionComponent {
     const authStatus:Signal<AuthStatus> = useSignal({ status: null })
     const localNode:Signal<LocalNode|null> = useSignal(null)
 
