@@ -51,7 +51,7 @@ This will create a new `BrowserLocalAuth`, and subscribe the passed in signals t
 See an example of an application that consumes this package in the [example directory](https://github.com/nichoth/jazz-signals/tree/main/example).
 
 ```ts
-import { localAuth, AuthStatus } from '@nichoth/jazz-signals'
+import { localAuth } from '@nichoth/jazz-signals'
 
 function MyPreactComponent ({ appName, syncAddress, appHostName }) {
     const { authStatus, localNode, logoutCount } = localAuth.createState()
