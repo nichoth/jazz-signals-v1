@@ -47,7 +47,7 @@ function localAuth (
 
 This will create a new `BrowserLocalAuth`, and subscribe the signals passed in as `opts:LocalAuthState` to its events. The return value is a function that will unsubscribe from `BrowserLocalAuth`. See [the example](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L33) for a demonstration of how the unsubscribe function can be used.
 
-To check if you are logged in, look for the `authStatus.value.logout` property. Call `authStatus.value.signUp` or `authStatus.value.signIn` to handle creating an account and logging in. See [an example of handling auth](https://github.com/nichoth/jazz-signals/blob/main/example/login.tsx#L54).
+To check if you are logged in, look for the `authStatus.value.logout` property. If `.logout` exists, then you are logged in. Call `authStatus.value.signUp` or `authStatus.value.signIn` to handle creating an account and logging in. See [an example of handling auth](https://github.com/nichoth/jazz-signals/blob/main/example/login.tsx#L54).
 
 ## example
 An example of an application that consumes this package is in the [example directory](https://github.com/nichoth/jazz-signals/tree/main/example).

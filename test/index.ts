@@ -36,7 +36,7 @@ test('localAuth', t => {
 
 test('login', async t => {
     effect(async () => {
-        console.log('**status**', state.authStatus.value.status)
+        console.log('**status**', state.authStatus.value)
 
         // if (state.authStatus.value.status === null) return
         if (state.authStatus.value.status === 'ready') {
@@ -45,6 +45,8 @@ test('login', async t => {
             console.log('new state...', state.authStatus.value)
             t.equal(state.authStatus.value.status, 'signedIn')
         }
+
+        console.log('down here')
     })
 
     await sleep(1000)
