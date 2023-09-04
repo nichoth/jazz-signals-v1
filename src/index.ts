@@ -33,7 +33,7 @@ export type LoadingStatus = { status: 'loading' }
 export type ReadyStatus = {
     status: 'ready';
     logIn: () => void;
-    signUp: (username:string) => void;
+    signUp: (username:string) => Promise<void>;
 }
 export type SignedInStatus = {
     status: 'signedIn';
@@ -55,7 +55,7 @@ export interface LocalAuthState {
  * Fills the place of `useJazz` in the react example.
  * Use this to get a `localNode`.
  *
- * We pass in the signals and mutate their values, return a function
+ * We pass in signals and mutate their values, return a function
  * to unsubscribe
  */
 function localAuth (appName:string, appHostname:string|undefined,
@@ -74,7 +74,6 @@ function localAuth (appName:string, appHostname:string|undefined,
             },
 
             onSignedIn (next) {
-                console.log('signed in', authStatus.value)
                 authStatus.value = {
                     status: 'signedIn',
                     logOut: () => {
