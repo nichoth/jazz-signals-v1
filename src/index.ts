@@ -10,11 +10,12 @@ export async function telepathicSignal<T extends ContentType> (
     const state = useSignal<T|null>(null)
     if (!id) return state
 
-    let node
+    let node:T
     try {
         node = await localNode.load(id)
     } catch (err) {
         console.log('Failed to load', id, err)
+        throw new Error('Failed to load')
     }
 
     node.subscribe(newState => {
