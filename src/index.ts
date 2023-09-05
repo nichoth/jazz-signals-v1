@@ -3,28 +3,23 @@ import { BrowserLocalAuth } from 'jazz-browser-auth-local'
 import { useSignal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
-export async function telepathicSignal<T extends ContentType> (
+/**
+ * Create a signal for telepathic state
+ */
+export function telepathicSignal<T extends ContentType> (
     localNode:LocalNode,
     id?: CoID<T>
-):Promise<Signal<T|null>> {
+):Signal<T|null> {
     const state = useSignal<T|null>(null)
     if (!id) return state
 
-    let node:T
-    try {
-        node = await localNode.load(id)
-    } catch (err) {
-        console.log('Failed to load', id, err)
-        throw new Error('Failed to load')
-    }
-
-    node.subscribe(newState => {
-        // console.log(
-        //     "Got update",
-        //     id,
-        //     newState.toJSON(),
-        // );
-        state.value = newState as T
+    localNode.load(id).then(node => {
+        node.subscribe(newState => {
+            console.log('Got update', id, newState.toJSON())
+            state.value = newState as T
+        })
+    }).catch(err => {
+        console.log('errrrr', err)
     })
 
     return state
@@ -103,7 +98,8 @@ function localAuth (appName:string, appHostname:string|undefined,
     })
 
     return function done () {
-        if (!_done) throw new Error('Called `done` before it exists')
+        if (!_done) return console.log('oh no...', localNode.value)
+        // if (!_done) throw new Error('Called `done` before it exists')
         _done()
     }
 }
