@@ -1,8 +1,13 @@
+body {
+    margin: 8px;
+}
+
 #root {
     font-family: sans-serif;
 
     & > div {
-        width: min(40rem, 100vw);
+        /* -16 for the body's margin */
+        width: min(40rem, calc(100vw - 16px));
         margin: 0 auto;
     }
 }

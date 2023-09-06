@@ -36,6 +36,8 @@ localAuth.createState = function ():LocalAuthState
 
 The returned state object should be passed into the `localAuth` function. See an example [in the example app](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L27).
 
+The signals that are returned are simple signals; you [would want to wrap them in a call to `useMemo`](https://preactjs.com/guide/v10/signals/#local-state-with-signals) if you use them in a view component.
+
 ### localAuth
 ```ts
 function localAuth (

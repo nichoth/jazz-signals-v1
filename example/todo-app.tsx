@@ -179,7 +179,7 @@ function ListControls ({ onCreateList }:{
             <Button isSpinning={false}
                 disabled={!isValid}
             >
-                Create a new account
+                Create a new todo list
             </Button>
         </div>
     </form>)
