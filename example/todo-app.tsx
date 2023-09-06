@@ -32,16 +32,16 @@ export function TodoApp ({
     const [listId, setListId] = useState<CoID<TodoList>>()
 
     const { authStatus, localNode, logoutCount } = useMemo(() => {
-        console.log('********************************')
         return localAuth.createState()
     }, [appName, syncAddress, appHostName])
+
+    console.log('render', authStatus.value, localNode.value, logoutCount.value)
 
     /**
      * Get todo content
      */
     const list = useMemo(() => {
         if (!localNode.value) return
-        console.log('________________in memo_________________')
         return telepathicSignal(localNode.value, listId)
     }, [listId])
 
@@ -68,8 +68,6 @@ export function TodoApp ({
         return done
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
-    console.log('render', authStatus.value, localNode.value)
-
     /**
      * Get the app state -- todo list
      */
@@ -79,12 +77,9 @@ export function TodoApp ({
         listener()
 
         async function listener () {
-            console.log('hash change', localNode.value)
             if (!localNode.value) return
             const acceptedInvitation =
                 await consumeInviteLinkFromWindowLocation(localNode.value)
-
-            console.log('accepted invitation', acceptedInvitation)
 
             if (acceptedInvitation) {
                 setListId(acceptedInvitation.valueID as CoID<TodoList>)

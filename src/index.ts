@@ -1,6 +1,6 @@
 import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { useSignal, Signal } from '@preact/signals'
+import { useSignal, signal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
 /**
@@ -105,9 +105,9 @@ function localAuth (appName:string, appHostname:string|undefined,
 }
 
 localAuth.createState = function ():LocalAuthState {
-    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
-    const localNode:Signal<LocalNode|null> = useSignal(null)
-    const logoutCount:Signal<number> = useSignal(0)
+    const authStatus:Signal<AuthStatus> = signal({ status: null })
+    const localNode:Signal<LocalNode|null> = signal(null)
+    const logoutCount:Signal<number> = signal(0)
 
     return { authStatus, localNode, logoutCount }
 }
