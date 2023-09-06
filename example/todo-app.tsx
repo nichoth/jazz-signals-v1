@@ -1,10 +1,15 @@
 import { FunctionComponent } from 'preact'
 import { LocalNode, CoID, CoMap } from 'cojson'
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useState, useMemo } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Signal } from '@preact/signals'
-import { localAuth, AuthStatus, SignedInStatus } from '../src/index.jsx'
 import { Login } from './login.jsx'
+import {
+    telepathicSignal,
+    localAuth,
+    AuthStatus,
+    SignedInStatus
+} from '../src/index.js'
 import './todo-app.css'
 
 type TaskContent = { done: boolean; text: string };
@@ -24,7 +29,21 @@ export function TodoApp ({
     syncAddress?:string,
     appHostName?:string
 }):FunctionComponent {
-    const { authStatus, localNode, logoutCount } = localAuth.createState()
+    const [listId, setListId] = useState<CoID<TodoList>>()
+
+    const { authStatus, localNode, logoutCount } = useMemo(() => {
+        return localAuth.createState()
+    }, [])
+
+    /**
+     * Get todo content
+     */
+    const list = useMemo(() => {
+        if (!localNode.value) return
+        return telepathicSignal(localNode.value, listId)
+    }, [localNode.value, listId])
+
+    console.log('render', authStatus.value, localNode.value, logoutCount.value)
 
     // @ts-ignore
     window.authStatus = authStatus
@@ -38,21 +57,20 @@ export function TodoApp ({
             syncAddress
         })
 
+        if (!localNode.value) return done
+
         return done
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
-    /* eslint-disable */
-    const [listId, setListId] = useState<CoID<TodoList>>()
-
-    console.log('render', authStatus.value, localNode.value)
-
+    /**
+     * Get the app state -- todo list
+     */
     useEffect(() => {
         if (!localNode.value) return
         window.addEventListener('hashchange', listener)
         listener()
 
         async function listener () {
-            console.log('hash change', localNode.value)
             if (!localNode.value) return
             const acceptedInvitation =
                 await consumeInviteLinkFromWindowLocation(localNode.value)
@@ -85,6 +103,7 @@ export function TodoApp ({
         {signedIn ?
             (<div>
                 signed in, this is the app
+                <TodoListEl list={list} />
                 <div>
                     <button onClick={logout}>logout</button>
                 </div>
@@ -99,4 +118,15 @@ function isSignedIn (
     localNode:Signal<LocalNode|null>
 ):boolean {
     return (!!localNode.value && !!(authStatus.value as SignedInStatus).logOut)
+}
+
+function TodoListEl ({ list }:{ list?:Signal<TodoList|null> }):FunctionComponent|null {
+    console.log('list', list?.value)
+    if (!list || !list.value) return null
+
+    return (<div className="todo-list">
+        <ul className="todo-list">
+            <li>list</li>
+        </ul>
+    </div>)
 }

@@ -1,32 +1,18 @@
-import { render } from 'preact'
-import { html } from 'htm/preact'
-import { effect, Signal } from '@preact/signals'
+import { effect } from '@preact/signals'
 import { test } from '@socketsupply/tapzero'
 import {
-    AuthStatus,
     LocalAuthState,
     ReadyStatus,
     localAuth
 } from '../src/index.js'
 
-let Tester
 let state:LocalAuthState
 test('localAuth.createState', t => {
-    /**
-     * *Must* call `createState` inside a preact component, because it calls
-     * `useSignal`.
-     */
-    Tester = function Tester () {
-        state = localAuth.createState()
-        t.ok(state, 'should create state')
-        t.ok(state.authStatus, 'has authStatus')
-        t.ok(state.localNode, 'has localNode')
-        t.ok(state.logoutCount, 'has logoutCount')
-
-        return html`<div />`
-    }
-
-    render(html`<${Tester} />`, document.body)
+    state = localAuth.createState()
+    t.ok(state, 'should create state')
+    t.ok(state.authStatus, 'has authStatus')
+    t.ok(state.localNode, 'has localNode')
+    t.ok(state.logoutCount, 'has logoutCount')
 })
 
 test('localAuth', t => {
@@ -50,7 +36,7 @@ test('login', async t => {
     })
 
     await sleep(1000)
-    await (state.authStatus.value as ReadyStatus).signUp('test-user')
+    return await (state.authStatus.value as ReadyStatus).signUp('test-user')
 })
 
 /**

@@ -1,30 +1,25 @@
 import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { useSignal, Signal } from '@preact/signals'
+import { signal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
-export async function telepathicSignal<T extends ContentType> (
+/**
+ * Create a signal for telepathic state
+ */
+export function telepathicSignal<T extends ContentType> (
     localNode:LocalNode,
     id?: CoID<T>
-):Promise<Signal<T|null>> {
-    const state = useSignal<T|null>(null)
+):Signal<T|null> {
+    const state = signal<T|null>(null)
     if (!id) return state
 
-    let node:T
-    try {
-        node = await localNode.load(id)
-    } catch (err) {
-        console.log('Failed to load', id, err)
-        throw new Error('Failed to load')
-    }
-
-    node.subscribe(newState => {
-        // console.log(
-        //     "Got update",
-        //     id,
-        //     newState.toJSON(),
-        // );
-        state.value = newState as T
+    localNode.load(id).then(node => {
+        node.subscribe(newState => {
+            console.log('Got update', id, newState.toJSON())
+            state.value = newState as T
+        })
+    }).catch(err => {
+        console.log('errrrr', err)
     })
 
     return state
@@ -103,15 +98,16 @@ function localAuth (appName:string, appHostname:string|undefined,
     })
 
     return function done () {
-        if (!_done) throw new Error('Called `done` before it exists')
+        if (!_done) return console.log('oh no...', localNode.value)
+        // if (!_done) throw new Error('Called `done` before it exists')
         _done()
     }
 }
 
 localAuth.createState = function ():LocalAuthState {
-    const authStatus:Signal<AuthStatus> = useSignal({ status: null })
-    const localNode:Signal<LocalNode|null> = useSignal(null)
-    const logoutCount:Signal<number> = useSignal(0)
+    const authStatus:Signal<AuthStatus> = signal({ status: null })
+    const localNode:Signal<LocalNode|null> = signal(null)
+    const logoutCount:Signal<number> = signal(0)
 
     return { authStatus, localNode, logoutCount }
 }
