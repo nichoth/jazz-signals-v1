@@ -98,8 +98,7 @@ function localAuth (appName:string, appHostname:string|undefined,
     })
 
     return function done () {
-        if (!_done) return console.log('oh no...', localNode.value)
-        // if (!_done) throw new Error('Called `done` before it exists')
+        if (!_done) throw new Error('Called `done` before it exists')
         _done()
     }
 }
