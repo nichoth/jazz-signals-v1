@@ -57,8 +57,7 @@ export function TodoApp ({
      * Get todo content
      */
     const list = useMemo(() => {
-        if (!localNode.value) return
-        return telepathicSignal(localNode.value, listId)
+        return telepathicSignal(localNode, listId)
     }, [localNode.value, listId])
 
     console.log('render', authStatus.value, localNode.value, logoutCount.value)
@@ -186,7 +185,7 @@ function ListControls ({ onCreateList }:{
     </form>)
 }
 
-function TodoListEl ({ list }:{ list?:Signal<TodoList|null> }):FunctionComponent|null {
+function TodoListEl ({ list }:{ list:Signal<TodoList|null> }):FunctionComponent|null {
     console.log('list', list?.value)
     if (!list || !list.value) return null
 

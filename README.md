@@ -14,7 +14,7 @@ npm start
 ```
 
 ## API
-Import a function `localAuth` that helps with authentication, and has a property `createState` that returns observable state.
+Import a function `localAuth` that helps with authentication, and has a property `createState` that returns observable state. This will create and return a signal of a `localNode`, the object used for persistence/`telepathicState`.
 
 ```js
 import { localAuth } from '@nichoth/jazz-signals'

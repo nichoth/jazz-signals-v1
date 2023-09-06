@@ -7,13 +7,13 @@ import { ContentType, CoID, LocalNode } from 'cojson'
  * Create a signal for telepathic state
  */
 export function telepathicSignal<T extends ContentType> (
-    localNode:LocalNode,
+    localNode:Signal<LocalNode|null>,
     id?: CoID<T>
 ):Signal<T|null> {
     const state = signal<T|null>(null)
-    if (!id) return state
+    if (!id || !localNode.value) return state
 
-    localNode.load(id).then(node => {
+    localNode.value.load(id).then(node => {
         node.subscribe(newState => {
             console.log('Got update', id, newState.toJSON())
             state.value = newState as T
