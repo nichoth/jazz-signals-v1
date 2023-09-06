@@ -52,12 +52,14 @@ To check if you are logged in, look for the `authStatus.value.logout` property. 
 ## example
 An example of an application that consumes this package is in the [example directory](https://github.com/nichoth/jazz-signals/tree/main/example).
 
-```ts
-import { useEffect } from 'preact/hooks'
+```js
+import { useMemo, useEffect } from 'preact/hooks'
 import { localAuth } from '@nichoth/jazz-signals'
 
 function MyPreactComponent ({ appName, syncAddress, appHostName }) {
-    const { authStatus, localNode, logoutCount } = localAuth.createState()
+    const { authStatus, localNode, logoutCount } = useMemo(() => {
+        return localAuth.createState()
+    }, [])
 
     useEffect(() => {
         const done = localAuth(appName, appHostName, {
