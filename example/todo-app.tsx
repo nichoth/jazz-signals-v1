@@ -33,9 +33,7 @@ export function TodoApp ({
 
     const { authStatus, localNode, logoutCount } = useMemo(() => {
         return localAuth.createState()
-    }, [appName, syncAddress, appHostName])
-
-    console.log('render', authStatus.value, localNode.value, logoutCount.value)
+    }, [])
 
     /**
      * Get todo content
@@ -43,15 +41,9 @@ export function TodoApp ({
     const list = useMemo(() => {
         if (!localNode.value) return
         return telepathicSignal(localNode.value, listId)
-    }, [listId])
+    }, [localNode.value, listId])
 
-    // useEffect(() => {
-    //     if (!localNode.value) return
-    //     telepathicSignal(localNode.value, listId)
-    //         .then(state => {
-    //             list = state
-    //         })
-    // }, [localNode.value])
+    console.log('render', authStatus.value, localNode.value, logoutCount.value)
 
     // @ts-ignore
     window.authStatus = authStatus
@@ -64,6 +56,8 @@ export function TodoApp ({
             logoutCount,
             syncAddress
         })
+
+        if (!localNode.value) return done
 
         return done
     }, [appName, appHostName, syncAddress, logoutCount.value])
@@ -127,9 +121,12 @@ function isSignedIn (
 }
 
 function TodoListEl ({ list }:{ list?:Signal<TodoList|null> }):FunctionComponent|null {
+    console.log('list', list?.value)
     if (!list || !list.value) return null
 
-    return (<div>
-        list
+    return (<div className="todo-list">
+        <ul className="todo-list">
+            <li>list</li>
+        </ul>
     </div>)
 }

@@ -1,6 +1,6 @@
 import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { useSignal, signal, Signal } from '@preact/signals'
+import { signal, Signal } from '@preact/signals'
 import { ContentType, CoID, LocalNode } from 'cojson'
 
 /**
@@ -10,7 +10,7 @@ export function telepathicSignal<T extends ContentType> (
     localNode:LocalNode,
     id?: CoID<T>
 ):Signal<T|null> {
-    const state = useSignal<T|null>(null)
+    const state = signal<T|null>(null)
     if (!id) return state
 
     localNode.load(id).then(node => {

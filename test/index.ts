@@ -6,25 +6,8 @@ import {
     localAuth
 } from '../src/index.js'
 
-// let Tester
 let state:LocalAuthState
 test('localAuth.createState', t => {
-    /**
-     * *Must* call `createState` inside a preact component, because it calls
-     * `useSignal`.
-     */
-    // Tester = function Tester () {
-    //     state = localAuth.createState()
-    //     t.ok(state, 'should create state')
-    //     t.ok(state.authStatus, 'has authStatus')
-    //     t.ok(state.localNode, 'has localNode')
-    //     t.ok(state.logoutCount, 'has logoutCount')
-
-    //     return html`<div />`
-    // }
-
-    // render(html`<${Tester} />`, document.body)
-
     state = localAuth.createState()
     t.ok(state, 'should create state')
     t.ok(state.authStatus, 'has authStatus')
