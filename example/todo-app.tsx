@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'preact'
 import { LocalNode, CoID, CoMap } from 'cojson'
-import { useEffect, useState, useMemo } from 'preact/hooks'
+import { useEffect, useState, useMemo, useCallback } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Signal } from '@preact/signals'
 import { Login } from './login.jsx'
@@ -10,7 +10,12 @@ import {
     AuthStatus,
     SignedInStatus
 } from '../src/index.js'
+import { TextInput } from './components/text-input.jsx'
+import { Button } from './components/button.jsx'
+import './components/text-input.css'
+import './components/button.css'
 import './todo-app.css'
+import './list-controls.css'
 
 type TaskContent = { done: boolean; text: string };
 type Task = CoMap<TaskContent>;
@@ -34,6 +39,19 @@ export function TodoApp ({
     const { authStatus, localNode, logoutCount } = useMemo(() => {
         return localAuth.createState()
     }, [])
+
+    const createList = useCallback((title: string) => {
+        if (!title) return
+        if (!localNode.value) return
+        const listGroup = localNode.value.createGroup()
+        const list = listGroup.createMap<TodoList>()
+
+        list.edit((list) => {
+            list.set('title', title)
+        })
+
+        window.location.hash = list.id
+    }, [localNode.value])
 
     /**
      * Get todo content
@@ -102,6 +120,7 @@ export function TodoApp ({
 
         {signedIn ?
             (<div>
+                <ListControls onCreateList={createList} />
                 signed in, this is the app
                 <TodoListEl list={list} />
                 <div>
@@ -118,6 +137,53 @@ function isSignedIn (
     localNode:Signal<LocalNode|null>
 ):boolean {
     return (!!localNode.value && !!(authStatus.value as SignedInStatus).logOut)
+}
+
+function ListControls ({ onCreateList }:{
+    onCreateList: (title:string) => void
+}):FunctionComponent {
+    const [isValid, setValid] = useState(false)
+
+    function submit (ev) {
+        ev.preventDefault()
+        const { title } = ev.target.elements
+        onCreateList(title.value)
+    }
+
+    // need this because `onInput` event doesnt work for cmd + delete event
+    async function onFormKeydown (ev:KeyboardEvent) {
+        const key = ev.key
+        const { form } = ev.target as HTMLInputElement
+        if (!form) return
+        if (key !== 'Backspace' && key !== 'Delete') return
+
+        const _isValid = (form.checkValidity())
+        if (_isValid !== isValid) setValid(_isValid)
+    }
+
+    function handleInput (ev) {
+        const { form } = ev.target as HTMLInputElement
+        const _isValid = (form as HTMLFormElement).checkValidity()
+        if (_isValid !== isValid) setValid(_isValid)
+    }
+
+    return (<form className="list-controls" onSubmit={submit}
+        onInput={handleInput}
+        onKeydown={onFormKeydown}
+    >
+        <TextInput minLength={3} displayName="List name"
+            name="title"
+            required={true}
+        />
+
+        <div className="control">
+            <Button isSpinning={false}
+                disabled={!isValid}
+            >
+                Create a new account
+            </Button>
+        </div>
+    </form>)
 }
 
 function TodoListEl ({ list }:{ list?:Signal<TodoList|null> }):FunctionComponent|null {
