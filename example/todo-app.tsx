@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'preact'
-import { LocalNode, CoID, CoMap } from 'cojson'
+import { LocalNode, CoID } from 'cojson'
 import { useEffect, useState, useMemo, useCallback } from 'preact/hooks'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Signal } from '@preact/signals'
@@ -10,20 +10,13 @@ import {
     AuthStatus,
     SignedInStatus
 } from '../src/index.js'
+import { ListOfTasks, TodoProject } from './types.js'
 import { TextInput } from './components/text-input.jsx'
 import { Button } from './components/button.jsx'
 import './components/text-input.css'
 import './components/button.css'
 import './todo-app.css'
 import './list-controls.css'
-
-type TaskContent = { done: boolean; text: string };
-type Task = CoMap<TaskContent>;
-type TodoListContent = {
-    title: string;
-    [taskId: CoID<Task>]: true;  // other keys form a set of task IDs
-}
-type TodoList = CoMap<TodoListContent>
 
 export function TodoApp ({
     appName,
@@ -34,7 +27,7 @@ export function TodoApp ({
     syncAddress?:string,
     appHostName?:string
 }):FunctionComponent {
-    const [listId, setListId] = useState<CoID<TodoList>>()
+    const [listId, setListId] = useState<CoID<ListOfTasks>>()
 
     const { authStatus, localNode, logoutCount } = useMemo(() => {
         return localAuth.createState()
@@ -43,14 +36,25 @@ export function TodoApp ({
     const createList = useCallback((title: string) => {
         if (!title) return
         if (!localNode.value) return
-        const listGroup = localNode.value.createGroup()
-        const list = listGroup.createMap<TodoList>()
 
-        list.edit((list) => {
-            list.set('title', title)
+        // To create a new todo project, we first create a `Group`,
+        // which is a scope for defining access rights (reader/writer/admin)
+        // of its members, which will apply to all CoValues owned by that group.
+        const projectGroup = localNode.value.createGroup()
+
+        // Then we create an empty todo project and list of tasks within
+        //   that group.
+        const project = projectGroup.createMap<TodoProject>()
+        const tasks = projectGroup.createList<ListOfTasks>()
+
+        // We edit the todo project to initialise it.
+        // Inside the `.edit` callback we can mutate a CoValue
+        project.edit((project) => {
+            project.set('title', title)
+            project.set('tasks', tasks.id)
         })
 
-        window.location.hash = list.id
+        // navigateToProjectId(project.id);
     }, [localNode.value])
 
     /**
@@ -80,7 +84,7 @@ export function TodoApp ({
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
     /**
-     * Get the app state -- todo list
+     * Get the app state -- a todo list
      */
     useEffect(() => {
         if (!localNode.value) return
@@ -93,12 +97,12 @@ export function TodoApp ({
                 await consumeInviteLinkFromWindowLocation(localNode.value)
 
             if (acceptedInvitation) {
-                setListId(acceptedInvitation.valueID as CoID<TodoList>)
+                setListId(acceptedInvitation.valueID as CoID<ListOfTasks>)
                 window.location.hash = acceptedInvitation.valueID
                 return
             }
 
-            setListId(window.location.hash.slice(1) as CoID<TodoList>)
+            setListId(window.location.hash.slice(1) as CoID<ListOfTasks>)
         }
 
         return () => {
@@ -185,9 +189,11 @@ function ListControls ({ onCreateList }:{
     </form>)
 }
 
-function TodoListEl ({ list }:{ list:Signal<TodoList|null> }):FunctionComponent|null {
+function TodoListEl ({ list }:{
+    list:Signal<ListOfTasks|null>
+}):FunctionComponent|null {
     console.log('list', list?.value)
-    if (!list || !list.value) return null
+    if (!list.value) return null
 
     return (<div className="todo-list">
         <ul className="todo-list">

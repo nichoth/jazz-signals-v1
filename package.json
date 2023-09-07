@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@preact/signals": "^1.2.1",
-    "cojson": "^0.1.3",
+    "cojson": "0.1.8",
     "jazz-browser": "^0.1.3",
     "jazz-browser-auth-local": "^0.1.3"
   },
