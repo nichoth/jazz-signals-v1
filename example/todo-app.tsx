@@ -45,6 +45,18 @@ export function TodoApp ({
 
     const signedIn = isSignedIn(authStatus, localNode)
 
+    console.log('singed in ', signedIn)
+
+    /**
+     * Listen for route changes
+     */
+    useEffect(() => {
+        return route(function onRoute (path) {
+            console.log('on route change', path)
+            routeState.value = path
+        })
+    }, [])
+
     /**
      *  - instantiate a local node
      *  - redirect to `/login` if not authd
@@ -57,8 +69,6 @@ export function TodoApp ({
             syncAddress
         })
 
-        console.log('done')
-
         if (authStatus.value.status !== 'signedIn') {
             if (location.pathname === '/login') return done
             route.setRoute('/login')
@@ -66,15 +76,6 @@ export function TodoApp ({
 
         return done
     }, [appName, appHostName, syncAddress, logoutCount.value])
-
-    /**
-     * Listen for route changes
-     */
-    useEffect(() => {
-        return route(function onRoute (path) {
-            routeState.value = path
-        })
-    }, [])
 
     // const createList = useCallback((title: string) => {
     //     if (!title) return
@@ -151,18 +152,6 @@ export function TodoApp ({
     return (<div className={signedIn ? 'signed-in' : 'not-signed-in'}>
         <h1>{appName}</h1>
         <El setRoute={route.setRoute} logout={logout} {...state} />
-
-        {/* {signedIn ?
-            (<div>
-                <ListControls onCreateList={createList} />
-                signed in, this is the app
-                <TodoListEl list={list} />
-                <div>
-                    <button onClick={logout}>logout</button>
-                </div>
-            </div>) :
-            (<Login authStatus={authStatus} />)
-        } */}
     </div>)
 }
 
