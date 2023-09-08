@@ -1,25 +1,22 @@
 import { FunctionComponent } from 'preact'
-import { LocalNode } from 'cojson'
+import { CoValueImpl, LocalNode, CoID } from 'cojson'
 import Route from 'route-event'
 import { useEffect, useMemo } from 'preact/hooks'
-// import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Signal, useSignal } from '@preact/signals'
+import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import {
-    // telepathicSignal,
     localAuth,
     AuthStatus,
     SignedInStatus
 } from '../src/index.js'
-// import { ListOfTasks } from './types.js'
-// import { TextInput } from './components/text-input.jsx'
-// import { Button } from './components/button.jsx'
-// import './components/text-input.css'
-// import './components/button.css'
 import './todo-app.css'
-// import './list-controls.css'
 import Router from './router.jsx'
 
-const router = Router()
+/**
+ * Setup routing
+ * Create a localNode
+ * Look at auth
+ */
 
 export function TodoApp ({
     appName,
@@ -30,29 +27,58 @@ export function TodoApp ({
     syncAddress?:string,
     appHostName?:string
 }):FunctionComponent {
+    const router = useMemo(() => Router(), [])
     const routeState = useSignal<string>(location.pathname + location.search)
-    const route = useMemo(() => Route(), [])
+    const currentProjectId = useSignal<string>('')
 
     /**
      *  Create a localNode and auth state
      */
-    const state = useMemo(() => {
-        return localAuth.createState()
-    }, [])
+    const state = useMemo(() => localAuth.createState(), [])
     const { authStatus, localNode, logoutCount } = state
-
-    console.log('status', authStatus.value)
 
     const signedIn = isSignedIn(authStatus, localNode)
 
-    console.log('singed in ', signedIn)
+    /**
+     * Listen for hash changes
+     * This is relevant when you are viewing a project
+     * or when you accept an invitation
+     *
+     * see [this example](https://github.com/gardencmp/jazz/blob/main/examples/todo/src/router.ts#L5)
+     */
+    useEffect(() => {
+        const listener = async () => {
+            if (!localNode.value) return
+            const acceptedInvitation =
+                await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+                    localNode.value
+                )
+
+            if (acceptedInvitation) {
+                currentProjectId.value = acceptedInvitation.valueID
+                route.setRoute('/id/' + acceptedInvitation.valueID)
+                // window.location.hash = acceptedInvitation.valueID
+                return
+            }
+
+            currentProjectId.value = (window.location.hash
+                .slice(1) as CoID<CoValueImpl> || null)
+        }
+
+        window.addEventListener('hashchange', listener)
+        listener()
+
+        return () => {
+            window.removeEventListener('hashchange', listener)
+        }
+    }, [localNode.value])
 
     /**
      * Listen for route changes
      */
+    const route = useMemo(() => Route(), [])
     useEffect(() => {
         return route(function onRoute (path) {
-            console.log('on route change', path)
             routeState.value = path
         })
     }, [])
@@ -62,7 +88,7 @@ export function TodoApp ({
      *  - redirect to `/login` if not authd
      */
     useEffect(() => {
-        const done = localAuth(appName, appHostName, {
+        const unlisten = localAuth(appName, appHostName, {
             authStatus,
             localNode,
             logoutCount,
@@ -70,75 +96,17 @@ export function TodoApp ({
         })
 
         if (authStatus.value.status !== 'signedIn') {
-            if (location.pathname === '/login') return done
+            if (location.pathname === '/login') return unlisten
             route.setRoute('/login')
         }
 
-        return done
+        return unlisten
     }, [appName, appHostName, syncAddress, logoutCount.value])
-
-    // const createList = useCallback((title: string) => {
-    //     if (!title) return
-    //     if (!localNode.value) return
-
-    //     // To create a new todo project, we first create a `Group`,
-    //     // which is a scope for defining access rights (reader/writer/admin)
-    //     // of its members, which will apply to all CoValues owned by that group.
-    //     const projectGroup = localNode.value.createGroup()
-
-    //     // Then we create an empty todo project and list of tasks within
-    //     //   that group.
-    //     const project = projectGroup.createMap<TodoProject>()
-    //     const tasks = projectGroup.createList<ListOfTasks>()
-
-    //     // We edit the todo project to initialise it.
-    //     // Inside the `.edit` callback we can mutate a CoValue
-    //     project.edit((project) => {
-    //         project.set('title', title)
-    //         project.set('tasks', tasks.id)
-    //     })
-
-    //     // navigateToProjectId(project.id);
-    // }, [localNode.value])
-
-    // /**
-    //  * Get todo content
-    //  */
-    // const list = useMemo(() => {
-    //     return telepathicSignal(localNode, listId)
-    // }, [localNode.value, listId])
 
     console.log('render', authStatus.value, localNode.value, logoutCount.value)
 
     // @ts-ignore
     window.authStatus = authStatus
-
-    // /**
-    //  * Get the app state -- a todo list
-    //  */
-    // useEffect(() => {
-    //     if (!localNode.value) return
-    //     window.addEventListener('hashchange', listener)
-    //     listener()
-
-    //     async function listener () {
-    //         if (!localNode.value) return
-    //         const acceptedInvitation =
-    //             await consumeInviteLinkFromWindowLocation(localNode.value)
-
-    //         if (acceptedInvitation) {
-    //             setListId(acceptedInvitation.valueID as CoID<ListOfTasks>)
-    //             window.location.hash = acceptedInvitation.valueID
-    //             return
-    //         }
-
-    //         setListId(window.location.hash.slice(1) as CoID<ListOfTasks>)
-    //     }
-
-    //     return () => {
-    //         window.removeEventListener('hashchange', listener)
-    //     }
-    // }, [localNode.value])
 
     function logout (ev) {
         ev.preventDefault()
@@ -147,11 +115,15 @@ export function TodoApp ({
     }
 
     const match = router.match(routeState.value)
-    const El = match.action(match)
+    const Element = match.action(match)
 
-    return (<div className={signedIn ? 'signed-in' : 'not-signed-in'}>
+    console.log('ellll', Element)
+
+    return (<div className={'todo-app' + (signedIn ? 'signed-in' : 'not-signed-in')}>
         <h1>{appName}</h1>
-        <El setRoute={route.setRoute} logout={logout} {...state} />
+        <Element setRoute={route.setRoute} logout={logout} {...state}
+            params={match.params}
+        />
     </div>)
 }
 

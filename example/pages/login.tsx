@@ -28,7 +28,6 @@ export function Login ({ authStatus, setRoute }:{
     setRoute:(path:string) => void;
 }):FunctionComponent {
     const [isValid, setValid] = useState(false)
-    console.log('in here')
 
     if (authStatus.value && authStatus.value.status === 'loading') {
         return (<div className="loading">
@@ -65,17 +64,20 @@ export function Login ({ authStatus, setRoute }:{
             }
 
             // type must be 'create'
-            // get the username
             const username = ((ev.target as HTMLButtonElement).form!.elements
                 .namedItem('username') as HTMLInputElement).value
 
             await (authStatus.value as ReadyStatus).signUp(username)
+
+            setRoute('/')
         } catch (err) {
             console.log('errrrr', err)
         }
     }
 
-    console.log('authstatus', authStatus.value)
+    if (authStatus.value?.status === 'signedIn') {
+        setRoute('/')
+    }
 
     return (authStatus.value && authStatus.value.status === 'ready') ?
         (<div className="ready">
