@@ -14,10 +14,12 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@nichoth/routes": "3.0.7",
     "@preact/signals": "^1.2.1",
-    "cojson": "0.1.8",
-    "jazz-browser": "^0.1.3",
-    "jazz-browser-auth-local": "^0.1.3"
+    "cojson": "0.1.10",
+    "jazz-browser": "0.1.10",
+    "jazz-browser-auth-local": "0.1.10",
+    "route-event": "4.1.10"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
