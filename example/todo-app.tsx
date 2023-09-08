@@ -41,10 +41,13 @@ export function TodoApp ({
     }, [])
     const { authStatus, localNode, logoutCount } = state
 
+    console.log('status', authStatus.value)
+
     const signedIn = isSignedIn(authStatus, localNode)
 
     /**
-     * instantiate a local node
+     *  - instantiate a local node
+     *  - redirect to `/login` if not authd
      */
     useEffect(() => {
         const done = localAuth(appName, appHostName, {
@@ -53,6 +56,8 @@ export function TodoApp ({
             logoutCount,
             syncAddress
         })
+
+        console.log('done')
 
         if (authStatus.value.status !== 'signedIn') {
             if (location.pathname === '/login') return done

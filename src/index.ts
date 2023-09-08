@@ -58,10 +58,12 @@ function localAuth (appName:string, appHostname:string|undefined,
     opts:LocalAuthState)
 :() => void {
     const { syncAddress, localNode, authStatus, logoutCount } = opts
+    console.log('aaaaaa')
 
     const localAuthObj = new BrowserLocalAuth(
         {
             onReady (next) {
+                console.log('in hereererer')
                 authStatus.value = {
                     status: 'ready',
                     logIn: next.logIn,
