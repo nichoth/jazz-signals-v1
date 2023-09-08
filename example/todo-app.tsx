@@ -1,22 +1,22 @@
 import { FunctionComponent } from 'preact'
-import { LocalNode, CoID } from 'cojson'
+import { LocalNode } from 'cojson'
 import Route from 'route-event'
-import { useEffect, useState, useMemo } from 'preact/hooks'
+import { useEffect, useMemo } from 'preact/hooks'
 // import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
-import { Signal } from '@preact/signals'
+import { Signal, useSignal } from '@preact/signals'
 import {
     // telepathicSignal,
     localAuth,
     AuthStatus,
     SignedInStatus
 } from '../src/index.js'
-import { ListOfTasks } from './types.js'
-import { TextInput } from './components/text-input.jsx'
-import { Button } from './components/button.jsx'
-import './components/text-input.css'
-import './components/button.css'
+// import { ListOfTasks } from './types.js'
+// import { TextInput } from './components/text-input.jsx'
+// import { Button } from './components/button.jsx'
+// import './components/text-input.css'
+// import './components/button.css'
 import './todo-app.css'
-import './list-controls.css'
+// import './list-controls.css'
 import Router from './router.jsx'
 
 const router = Router()
@@ -30,16 +30,16 @@ export function TodoApp ({
     syncAddress?:string,
     appHostName?:string
 }):FunctionComponent {
-    // const [listId, setListId] = useState<CoID<ListOfTasks>>()
-    const [href, setHref] = useState<string>(location.pathname + location.search)
+    const routeState = useSignal<string>(location.pathname + location.search)
     const route = useMemo(() => Route(), [])
 
     /**
      *  Create a localNode and auth state
      */
-    const { authStatus, localNode, logoutCount } = useMemo(() => {
+    const state = useMemo(() => {
         return localAuth.createState()
     }, [])
+    const { authStatus, localNode, logoutCount } = state
 
     const signedIn = isSignedIn(authStatus, localNode)
 
@@ -54,6 +54,11 @@ export function TodoApp ({
             syncAddress
         })
 
+        if (authStatus.value.status !== 'signedIn') {
+            if (location.pathname === '/login') return done
+            route.setRoute('/login')
+        }
+
         return done
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
@@ -61,18 +66,9 @@ export function TodoApp ({
      * Listen for route changes
      */
     useEffect(() => {
-        function onRouteChange (path) {
-            console.log('on change', path)
-            if (!signedIn && href !== path) {
-                setHref('/login')
-            } else {
-                setHref(path)
-            }
-        }
-
-        onRouteChange(href)
-
-        return route(onRouteChange)
+        return route(function onRoute (path) {
+            routeState.value = path
+        })
     }, [])
 
     // const createList = useCallback((title: string) => {
@@ -144,13 +140,12 @@ export function TodoApp ({
         (authStatus.value as SignedInStatus).logOut()
     }
 
-    const match = router.match(href)
+    const match = router.match(routeState.value)
     const El = match.action(match)
 
     return (<div className={signedIn ? 'signed-in' : 'not-signed-in'}>
         <h1>{appName}</h1>
-
-        <El setRoute={route.setRoute} logout={logout} />
+        <El setRoute={route.setRoute} logout={logout} {...state} />
 
         {/* {signedIn ?
             (<div>
@@ -173,62 +168,62 @@ function isSignedIn (
     return (!!localNode.value && !!(authStatus.value as SignedInStatus).logOut)
 }
 
-function ListControls ({ onCreateList }:{
-    onCreateList: (title:string) => void
-}):FunctionComponent {
-    const [isValid, setValid] = useState(false)
+// function ListControls ({ onCreateList }:{
+//     onCreateList: (title:string) => void
+// }):FunctionComponent {
+//     const [isValid, setValid] = useState(false)
 
-    function submit (ev) {
-        ev.preventDefault()
-        const { title } = ev.target.elements
-        onCreateList(title.value)
-    }
+//     function submit (ev) {
+//         ev.preventDefault()
+//         const { title } = ev.target.elements
+//         onCreateList(title.value)
+//     }
 
-    // need this because `onInput` event doesnt work for cmd + delete event
-    async function onFormKeydown (ev:KeyboardEvent) {
-        const key = ev.key
-        const { form } = ev.target as HTMLInputElement
-        if (!form) return
-        if (key !== 'Backspace' && key !== 'Delete') return
+//     // need this because `onInput` event doesnt work for cmd + delete event
+//     async function onFormKeydown (ev:KeyboardEvent) {
+//         const key = ev.key
+//         const { form } = ev.target as HTMLInputElement
+//         if (!form) return
+//         if (key !== 'Backspace' && key !== 'Delete') return
 
-        const _isValid = (form.checkValidity())
-        if (_isValid !== isValid) setValid(_isValid)
-    }
+//         const _isValid = (form.checkValidity())
+//         if (_isValid !== isValid) setValid(_isValid)
+//     }
 
-    function handleInput (ev) {
-        const { form } = ev.target as HTMLInputElement
-        const _isValid = (form as HTMLFormElement).checkValidity()
-        if (_isValid !== isValid) setValid(_isValid)
-    }
+//     function handleInput (ev) {
+//         const { form } = ev.target as HTMLInputElement
+//         const _isValid = (form as HTMLFormElement).checkValidity()
+//         if (_isValid !== isValid) setValid(_isValid)
+//     }
 
-    return (<form className="list-controls" onSubmit={submit}
-        onInput={handleInput}
-        onKeydown={onFormKeydown}
-    >
-        <TextInput minLength={3} displayName="List name"
-            name="title"
-            required={true}
-        />
+//     return (<form className="list-controls" onSubmit={submit}
+//         onInput={handleInput}
+//         onKeydown={onFormKeydown}
+//     >
+//         <TextInput minLength={3} displayName="List name"
+//             name="title"
+//             required={true}
+//         />
 
-        <div className="control">
-            <Button isSpinning={false}
-                disabled={!isValid}
-            >
-                Create a new todo list
-            </Button>
-        </div>
-    </form>)
-}
+//         <div className="control">
+//             <Button isSpinning={false}
+//                 disabled={!isValid}
+//             >
+//                 Create a new todo list
+//             </Button>
+//         </div>
+//     </form>)
+// }
 
-function TodoListEl ({ list }:{
-    list:Signal<ListOfTasks|null>
-}):FunctionComponent|null {
-    console.log('list', list?.value)
-    if (!list.value) return null
+// function TodoListEl ({ list }:{
+//     list:Signal<ListOfTasks|null>
+// }):FunctionComponent|null {
+//     console.log('list', list?.value)
+//     if (!list.value) return null
 
-    return (<div className="todo-list">
-        <ul className="todo-list">
-            <li>list</li>
-        </ul>
-    </div>)
-}
+//     return (<div className="todo-list">
+//         <ul className="todo-list">
+//             <li>list</li>
+//         </ul>
+//     </div>)
+// }
