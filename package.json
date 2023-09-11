@@ -17,8 +17,8 @@
     "@nichoth/routes": "3.0.7",
     "@preact/signals": "^1.2.1",
     "cojson": "0.1.10",
-    "jazz-browser": "0.1.10",
-    "jazz-browser-auth-local": "0.1.10",
+    "jazz-browser": "0.2.0",
+    "jazz-browser-auth-local": "0.2.0",
     "route-event": "4.1.10"
   },
   "devDependencies": {

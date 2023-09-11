@@ -117,8 +117,6 @@ export function TodoApp ({
     const match = router.match(routeState.value)
     const Element = match.action(match)
 
-    console.log('ellll', Element)
-
     return (<div className={'todo-app' + (signedIn ? 'signed-in' : 'not-signed-in')}>
         <h1>{appName}</h1>
         <Element setRoute={route.setRoute} logout={logout} {...state}

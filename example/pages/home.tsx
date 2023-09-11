@@ -6,8 +6,6 @@ import { Button } from '../components/button.jsx'
 export function Home ({ setRoute }:{
     setRoute:(path:string) => void;
 }):FunctionComponent {
-    console.log('in here')
-
     function createList (name:string) {
         console.log('create a new list', name)
     }
@@ -25,7 +23,6 @@ function NewList ({ onSubmit }:{
 
     function input (ev:InputEvent & { target: HTMLFormElement }) {
         const form = ev.target
-        // const name = form.elements['list-name'].value
         const isOk = form.checkValidity()
         if (isOk !== isValid) setValid(isOk)
     }
