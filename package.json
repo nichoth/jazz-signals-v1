@@ -22,7 +22,6 @@
     "route-event": "4.1.10"
   },
   "devDependencies": {
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@preact/preset-vite": "^2.5.0",
     "@socketsupply/tapzero": "^0.7.1",
     "@typescript-eslint/parser": "^5.55.0",
