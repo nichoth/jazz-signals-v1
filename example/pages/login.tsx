@@ -81,6 +81,8 @@ export function Login ({ authStatus, setRoute }:{
 
     return (authStatus.value && authStatus.value.status === 'ready') ?
         (<div className="ready">
+            <h2>Login</h2>
+
             <form id="login-form" onInput={handleInput}
                 onClick={handleFormClick}
                 onKeydown={onFormKeydown}
@@ -91,18 +93,26 @@ export function Login ({ authStatus, setRoute }:{
                     autoComplete="webauthn"
                 />
                 <div className="control">
+                    <h3>Create a new account</h3>
                     <Button isSpinning={false}
                         data-type="create"
                         disabled={!isValid}
                     >
-                        Create a new account
+                        Create account
                     </Button>
                 </div>
-                <div className="control">
+
+                <div className="divider">
+                    <span>or</span>
+                    <hr />
+                </div>
+
+                <div className="control login">
+                    <h3>Login with an existing account</h3>
                     <Button isSpinning={false} disabled={false}
-                        data-type="login"
+                        data-type="Login"
                     >
-                        Login with an existing account
+                        Login
                     </Button>
                 </div>
             </form>

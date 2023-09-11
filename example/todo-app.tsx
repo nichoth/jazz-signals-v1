@@ -18,6 +18,11 @@ import Router from './router.jsx'
  * Look at auth
  */
 
+/** The top level view component
+ *   - Setup routing
+ *   - redirect to `/login` if not authed
+ * @returns {FunctionComponent}
+ */
 export function TodoApp ({
     appName,
     syncAddress,
@@ -68,9 +73,7 @@ export function TodoApp ({
         window.addEventListener('hashchange', listener)
         listener()
 
-        return () => {
-            window.removeEventListener('hashchange', listener)
-        }
+        return () => window.removeEventListener('hashchange', listener)
     }, [localNode.value])
 
     /**
@@ -117,7 +120,7 @@ export function TodoApp ({
     const match = router.match(routeState.value)
     const Element = match.action(match)
 
-    return (<div className={'todo-app' + (signedIn ? 'signed-in' : 'not-signed-in')}>
+    return (<div className={'todo-app ' + (signedIn ? 'signed-in' : 'not-signed-in')}>
         <h1>{appName}</h1>
         <Element setRoute={route.setRoute} logout={logout} {...state}
             params={match.params}

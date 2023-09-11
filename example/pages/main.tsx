@@ -14,30 +14,27 @@ export function MainView ({
     localNode: LocalNode;
     navigateToProjectId:(id:string) => void;
 }):FunctionComponent {
-    const createProject = useCallback(
-        (title: string) => {
-            if (!title) return
+    const createProject = useCallback((title: string) => {
+        if (!title) return
 
-            // To create a new todo project, we first create a `Group`,
-            // which is a scope for defining access rights (reader/writer/admin)
-            // of its members, which will apply to all CoValues owned by that group.
-            const projectGroup = localNode.createGroup()
+        // To create a new todo project, we first create a `Group`,
+        // which is a scope for defining access rights (reader/writer/admin)
+        // of its members, which will apply to all CoValues owned by that group.
+        const projectGroup = localNode.createGroup()
 
-            // Then we create an empty todo project and list of tasks within that group.
-            const project = projectGroup.createMap<TodoProject>()
-            const tasks = projectGroup.createList<ListOfTasks>()
+        // Then we create an empty todo project and list of tasks within that group.
+        const project = projectGroup.createMap<TodoProject>()
+        const tasks = projectGroup.createList<ListOfTasks>()
 
-            // We edit the todo project to initialise it.
-            // Inside the `.edit` callback we can mutate a CoValue
-            project.edit((project) => {
-                project.set('title', title)
-                project.set('tasks', tasks.id)
-            })
+        // We edit the todo project to initialise it.
+        // Inside the `.edit` callback we can mutate a CoValue
+        project.edit((project) => {
+            project.set('title', title)
+            project.set('tasks', tasks.id)
+        })
 
-            navigateToProjectId(project.id)
-        },
-        [localNode, navigateToProjectId]
-    )
+        navigateToProjectId(project.id)
+    }, [localNode, navigateToProjectId])
 
     function submit (ev:SubmitEvent) {
         ev.preventDefault()

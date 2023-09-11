@@ -3,6 +3,10 @@ import { useState } from 'preact/hooks'
 import { TextInput } from '../components/text-input.jsx'
 import { Button } from '../components/button.jsx'
 
+/**
+ * @TODO -- should show a list of lists
+ * @returns {FunctionComponent}
+ */
 export function Home ({ setRoute }:{
     setRoute:(path:string) => void;
 }):FunctionComponent {
@@ -15,6 +19,10 @@ export function Home ({ setRoute }:{
         <NewList onSubmit={createList} />
     </div>)
 }
+
+// function ListList ({}):FunctionComponent {
+//     return (<div>list of lists</div>)
+// }
 
 function NewList ({ onSubmit }:{
     onSubmit:(name:string) => any

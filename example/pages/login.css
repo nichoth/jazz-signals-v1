@@ -3,5 +3,8 @@
 
     & .control {
         margin-bottom: 1rem;
+        &.login {
+            margin-top: 2rem;
+        }
     }
 }
