@@ -2,16 +2,21 @@ import { FunctionComponent } from 'preact'
 import { useState } from 'preact/hooks'
 import { TextInput } from '../components/text-input.jsx'
 import { Button } from '../components/button.jsx'
+import { Bus } from '@nichoth/events'
+
+Home.Events = Bus.createEvents(['createList'], Home.name)
 
 /**
  * @TODO -- should show a list of lists
  * @returns {FunctionComponent}
  */
-export function Home ({ setRoute }:{
+export function Home ({ setRoute, emit }:{
     setRoute:(path:string) => void;
+    emit: (name:string, data:any) => void
 }):FunctionComponent {
     function createList (name:string) {
         console.log('create a new list', name)
+        emit(Home.Events.createList, name)
     }
 
     return (<div className="route home">

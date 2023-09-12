@@ -4,6 +4,9 @@ import Route from 'route-event'
 import { useEffect, useMemo } from 'preact/hooks'
 import { Signal, useSignal } from '@preact/signals'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
+import { Bus } from '@nichoth/events'
+import { Button } from './components/button.jsx'
+import { State } from './state.js'
 import {
     localAuth,
     AuthStatus,
@@ -12,11 +15,8 @@ import {
 import './todo-app.css'
 import Router from './router.jsx'
 
-/**
- * Setup routing
- * Create a localNode
- * Look at auth
- */
+TodoApp.Namespace = 'root'
+TodoApp.Events = Bus.createEvents(['routeChange', 'logout'], 'root')
 
 /** The top level view component
  *   - Setup routing
@@ -26,27 +26,30 @@ import Router from './router.jsx'
 export function TodoApp ({
     appName,
     syncAddress,
-    appHostName
+    appHostName,
+    emit,
+    state
 }:{
     appName:string,
     syncAddress?:string,
-    appHostName?:string
+    appHostName?:string,
+    emit:(name:string, data:any) => void,
+    state:ReturnType<typeof State>
 }):FunctionComponent {
     const router = useMemo(() => Router(), [])
-    const routeState = useSignal<string>(location.pathname + location.search)
+    // const routeState = useSignal<string>(location.pathname + location.search)
     const currentProjectId = useSignal<string>('')
 
     /**
      *  Create a localNode and auth state
      */
-    const state = useMemo(() => localAuth.createState(), [])
-    const { authStatus, localNode, logoutCount } = state
+    const { authStatus, localNode, logoutCount, route: routeState } = state
 
     const signedIn = isSignedIn(authStatus, localNode)
 
     /**
      * Listen for hash changes
-     * This is relevant when you are viewing a project
+     * This is relevant when you are viewing an existing project
      * or when you accept an invitation
      *
      * see [this example](https://github.com/gardencmp/jazz/blob/main/examples/todo/src/router.ts#L5)
@@ -61,7 +64,7 @@ export function TodoApp ({
 
             if (acceptedInvitation) {
                 currentProjectId.value = acceptedInvitation.valueID
-                route.setRoute('/id/' + acceptedInvitation.valueID)
+                route.setRoute('/id/#' + acceptedInvitation.valueID)
                 // window.location.hash = acceptedInvitation.valueID
                 return
             }
@@ -82,13 +85,14 @@ export function TodoApp ({
     const route = useMemo(() => Route(), [])
     useEffect(() => {
         return route(function onRoute (path) {
-            routeState.value = path
+            emit('routeChange', path)
         })
     }, [])
 
     /**
      *  - instantiate a local node
      *  - redirect to `/login` if not authd
+     *  - show logout page after logout
      */
     useEffect(() => {
         const unlisten = localAuth(appName, appHostName, {
@@ -98,7 +102,7 @@ export function TodoApp ({
             syncAddress
         })
 
-        if (authStatus.value.status !== 'signedIn') {
+        if (!signedIn) {
             if (location.pathname === '/login') return unlisten
             route.setRoute('/login')
         }
@@ -106,7 +110,10 @@ export function TodoApp ({
         return unlisten
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
-    console.log('render', authStatus.value, localNode.value, logoutCount.value)
+    console.log('render', authStatus.value, localNode.value, logoutCount.value,
+        routeState.value)
+
+    console.log('**render**', state)
 
     // @ts-ignore
     window.authStatus = authStatus
@@ -125,6 +132,15 @@ export function TodoApp ({
         <Element setRoute={route.setRoute} logout={logout} {...state}
             params={match.params}
         />
+
+        <div className="logout">
+            <Button
+                isSpinning={false}
+                onClick={emit.bind(emit, 'logout')}
+            >
+                Log Out
+            </Button>
+        </div>
     </div>)
 }
 

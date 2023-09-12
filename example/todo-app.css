@@ -5,6 +5,14 @@ body {
 #root {
     font-family: sans-serif;
 
+    .logout {
+        position: absolute;
+        bottom: 0;
+        margin: 2rem;
+        text-align: right;
+        width: calc(100% - 4rem);
+    }
+
     & > div {
         /* -16 for the body's margin */
         width: min(40rem, calc(100vw - 16px));
@@ -37,6 +45,8 @@ h3 {
 
 .divider {
     text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 
     & > span {
         font-style: italic;
