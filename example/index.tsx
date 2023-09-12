@@ -8,7 +8,7 @@ import { State } from './state.js'
  */
 const state = State()
 const bus = State.Bus(state) // connect events & state here
-const emit = bus.emitter([], TodoApp.Namespace)
+const emit = bus.emitter([], 'root')
 
 render(<TodoApp
     appName="Jazz Todo List Example"

@@ -4,7 +4,7 @@ import Route from 'route-event'
 import { useEffect, useMemo } from 'preact/hooks'
 import { Signal, useSignal } from '@preact/signals'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
-import { Bus } from '@nichoth/events'
+// import { Bus } from '@nichoth/events'
 import { Button } from './components/button.jsx'
 import { State } from './state.js'
 import {
@@ -15,8 +15,11 @@ import {
 import './todo-app.css'
 import Router from './router.jsx'
 
-TodoApp.Namespace = 'root'
-TodoApp.Events = Bus.createEvents(['routeChange', 'logout'], 'root')
+TodoApp.Events = (['routeChange', 'logout'])
+    .reduce<Record<string, string>>((acc, ev) => {
+        acc[ev] = ev
+        return acc
+    }, {})
 
 /** The top level view component
  *   - Setup routing
@@ -81,11 +84,12 @@ export function TodoApp ({
 
     /**
      * Listen for route changes
+     * @note this component doesn't know about its namespace
      */
     const route = useMemo(() => Route(), [])
     useEffect(() => {
         return route(function onRoute (path) {
-            emit('routeChange', path)
+            emit(TodoApp.Events.routeChange, path)
         })
     }, [])
 

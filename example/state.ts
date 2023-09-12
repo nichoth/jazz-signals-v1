@@ -14,6 +14,10 @@ export function State () {
     return { route: routeState, ...state }
 }
 
+const rootEvents = Bus.createEvents(Object.keys(TodoApp.Events), 'root')
+
+console.log('roote events', rootEvents)
+
 // const routeState = useSignal<string>(location.pathname + location.search)
 // const currentProjectId = useSignal<string>('')
 
@@ -24,11 +28,12 @@ State.Bus = (state:ReturnType<typeof State>) => {
         console.log('*****', name, data)
     })
 
-    bus.on(TodoApp.Events.routeChange, (newPath:string) => {
+    bus.on(rootEvents.routeChange, (newPath:string) => {
+        console.log('**route change**', newPath)
         state.route.value = newPath
     })
 
-    bus.on(Home.Events.createList, (data) => {
+    bus.on(rootEvents.createList, (data) => {
         console.log('create list', data)
     })
 
