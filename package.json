@@ -14,10 +14,11 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@nichoth/events": "2.0.3",
+    "@nichoth/events": "3.0.4",
     "@nichoth/routes": "3.0.7",
     "@preact/signals": "^1.2.1",
     "cojson": "0.2.0",
+    "flat": "5.0.2",
     "jazz-browser": "0.2.0",
     "jazz-browser-auth-local": "0.2.0",
     "route-event": "4.1.10"

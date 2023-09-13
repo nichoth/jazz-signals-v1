@@ -1,27 +1,24 @@
 import { FunctionComponent } from 'preact'
 import { CoValueImpl, LocalNode, CoID } from 'cojson'
 import Route from 'route-event'
-import { useEffect, useMemo } from 'preact/hooks'
+import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { Signal, useSignal } from '@preact/signals'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
-// import { Bus } from '@nichoth/events'
+import { NamespacedEvents } from '@nichoth/events'
 import { Button } from './components/button.jsx'
-import { State } from './state.js'
+import { Events, State } from './state.js'
 import {
     localAuth,
     AuthStatus,
     SignedInStatus
 } from '../src/index.js'
-import './todo-app.css'
 import Router from './router.jsx'
+import './todo-app.css'
 
-TodoApp.Events = (['routeChange', 'logout'])
-    .reduce<Record<string, string>>((acc, ev) => {
-        acc[ev] = ev
-        return acc
-    }, {})
+const evs = Events.root
 
 /** The top level view component
+ *
  *   - Setup routing
  *   - redirect to `/login` if not authed
  * @returns {FunctionComponent}
@@ -40,15 +37,16 @@ export function TodoApp ({
     state:ReturnType<typeof State>
 }):FunctionComponent {
     const router = useMemo(() => Router(), [])
-    // const routeState = useSignal<string>(location.pathname + location.search)
     const currentProjectId = useSignal<string>('')
 
     /**
-     *  Create a localNode and auth state
+     * localNode and auth state
      */
     const { authStatus, localNode, logoutCount, route: routeState } = state
 
-    const signedIn = isSignedIn(authStatus, localNode)
+    const signedIn = useMemo(() => {
+        return isSignedIn(authStatus, localNode)
+    }, [authStatus.value, localNode.value])
 
     /**
      * Listen for hash changes
@@ -84,19 +82,19 @@ export function TodoApp ({
 
     /**
      * Listen for route changes
-     * @note this component doesn't know about its namespace
      */
     const route = useMemo(() => Route(), [])
     useEffect(() => {
         return route(function onRoute (path) {
-            emit(TodoApp.Events.routeChange, path)
+            // emit route events
+            // they are handled by the app subscription
+            emit((evs as NamespacedEvents).routeChange as string, path)
         })
     }, [])
 
     /**
      *  - instantiate a local node
-     *  - redirect to `/login` if not authd
-     *  - show logout page after logout
+     *  - redirect to `/login` if not authed
      */
     useEffect(() => {
         const unlisten = localAuth(appName, appHostName, {
@@ -117,11 +115,6 @@ export function TodoApp ({
     console.log('render', authStatus.value, localNode.value, logoutCount.value,
         routeState.value)
 
-    console.log('**render**', state)
-
-    // @ts-ignore
-    window.authStatus = authStatus
-
     function logout (ev) {
         ev.preventDefault()
         console.log('logout');
@@ -129,7 +122,7 @@ export function TodoApp ({
     }
 
     const match = router.match(routeState.value)
-    const Element = match.action(match)
+    const Element = match.action(match, emit)
 
     return (<div className={'todo-app ' + (signedIn ? 'signed-in' : 'not-signed-in')}>
         <h1>{appName}</h1>
@@ -137,15 +130,28 @@ export function TodoApp ({
             params={match.params}
         />
 
-        <div className="logout">
+        <LogoutControl isSignedIn={signedIn} emit={emit} />
+    </div>)
+}
+
+function LogoutControl ({ isSignedIn, emit }:{
+    isSignedIn:boolean,
+    emit:(name, data)=>void
+}):FunctionComponent {
+    const logout = useCallback(() => {
+        emit((evs as NamespacedEvents).logout as string, null)
+    }, [emit])
+
+    return (isSignedIn ?
+        (<div className="logout">
             <Button
                 isSpinning={false}
-                onClick={emit.bind(emit, 'logout')}
+                onClick={logout}
             >
                 Log Out
             </Button>
-        </div>
-    </div>)
+        </div>) :
+        null)
 }
 
 function isSignedIn (
@@ -154,63 +160,3 @@ function isSignedIn (
 ):boolean {
     return (!!localNode.value && !!(authStatus.value as SignedInStatus).logOut)
 }
-
-// function ListControls ({ onCreateList }:{
-//     onCreateList: (title:string) => void
-// }):FunctionComponent {
-//     const [isValid, setValid] = useState(false)
-
-//     function submit (ev) {
-//         ev.preventDefault()
-//         const { title } = ev.target.elements
-//         onCreateList(title.value)
-//     }
-
-//     // need this because `onInput` event doesnt work for cmd + delete event
-//     async function onFormKeydown (ev:KeyboardEvent) {
-//         const key = ev.key
-//         const { form } = ev.target as HTMLInputElement
-//         if (!form) return
-//         if (key !== 'Backspace' && key !== 'Delete') return
-
-//         const _isValid = (form.checkValidity())
-//         if (_isValid !== isValid) setValid(_isValid)
-//     }
-
-//     function handleInput (ev) {
-//         const { form } = ev.target as HTMLInputElement
-//         const _isValid = (form as HTMLFormElement).checkValidity()
-//         if (_isValid !== isValid) setValid(_isValid)
-//     }
-
-//     return (<form className="list-controls" onSubmit={submit}
-//         onInput={handleInput}
-//         onKeydown={onFormKeydown}
-//     >
-//         <TextInput minLength={3} displayName="List name"
-//             name="title"
-//             required={true}
-//         />
-
-//         <div className="control">
-//             <Button isSpinning={false}
-//                 disabled={!isValid}
-//             >
-//                 Create a new todo list
-//             </Button>
-//         </div>
-//     </form>)
-// }
-
-// function TodoListEl ({ list }:{
-//     list:Signal<ListOfTasks|null>
-// }):FunctionComponent|null {
-//     console.log('list', list?.value)
-//     if (!list.value) return null
-
-//     return (<div className="todo-list">
-//         <ul className="todo-list">
-//             <li>list</li>
-//         </ul>
-//     </div>)
-// }

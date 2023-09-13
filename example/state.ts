@@ -1,40 +1,41 @@
 import { signal } from '@preact/signals'
-import { Bus } from '@nichoth/events'
-import { Home } from './pages/home.jsx'
-import { TodoApp } from './todo-app.jsx'
-import {
-    localAuth,
-    AuthStatus,
-    SignedInStatus
-} from '../src/index.js'
+import { Bus, NamespacedEvents } from '@nichoth/events'
+import { Events as TodoEvents } from './todo-events.js'
+import { Login } from './pages/login.jsx'
+import { localAuth } from '../src/index.js'
 
 export function State () {
     const state = localAuth.createState()
     const routeState = signal<string>(location.pathname + location.search)
+    // @ts-ignore
+    window.state = { route: routeState, ...state }
     return { route: routeState, ...state }
 }
 
-const rootEvents = Bus.createEvents(Object.keys(TodoApp.Events), 'root')
-
-console.log('roote events', rootEvents)
-
-// const routeState = useSignal<string>(location.pathname + location.search)
-// const currentProjectId = useSignal<string>('')
+export const Events = Bus.createEvents({
+    root: TodoEvents,
+    login: Login.Events
+})
 
 State.Bus = (state:ReturnType<typeof State>) => {
-    const bus = new Bus('todos')
+    const bus = new Bus()
 
     bus.on('*', (name, data) => {
         console.log('*****', name, data)
     })
 
-    bus.on(rootEvents.routeChange, (newPath:string) => {
-        console.log('**route change**', newPath)
-        state.route.value = newPath
+    bus.on((Events.root as NamespacedEvents).routeChange as string, (ev) => {
+        state.route.value = ev
     })
 
-    bus.on(rootEvents.createList, (data) => {
-        console.log('create list', data)
+    // bus.on(events.root.createList, (data) => {
+    //     console.log('create list', data)
+    // })
+
+    // ------- login page ---------
+
+    bus.on(((Events.login as NamespacedEvents).login as string), (data) => {
+        console.log('got login request', data)
     })
 
     return bus

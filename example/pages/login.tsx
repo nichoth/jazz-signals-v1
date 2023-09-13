@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
 import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
@@ -23,9 +23,17 @@ import './login.css'
     }
  */
 
-export function Login ({ authStatus, setRoute }:{
+// Login.Events = (['login']).reduce((acc, name) => {
+//     acc[name] = name
+//     return acc
+// }, {})
+
+Login.Events = ['login']
+
+export function Login ({ authStatus, setRoute, emit }:{
     authStatus: Signal<AuthStatus|null>;
     setRoute:(path:string) => void;
+    emit:{ (name, data):void, events:Record<string, string> }
 }):FunctionComponent {
     const [isValid, setValid] = useState(false)
 
@@ -52,6 +60,12 @@ export function Login ({ authStatus, setRoute }:{
         if (_isValid !== isValid) setValid(_isValid)
     }
 
+    useEffect(() => {
+        if (authStatus.value?.status === 'signedIn') {
+            setRoute('/')
+        }
+    }, [authStatus.value])
+
     async function handleFormClick (ev:MouseEvent) {
         ev.preventDefault()
 
@@ -60,7 +74,8 @@ export function Login ({ authStatus, setRoute }:{
             if (!type) return
 
             if (type === 'login') {
-                return await (authStatus.value as ReadyStatus).logIn()
+                emit(emit.events.login, null)
+                // return await (authStatus.value as ReadyStatus).logIn()
             }
 
             // type must be 'create'
@@ -73,10 +88,6 @@ export function Login ({ authStatus, setRoute }:{
         } catch (err) {
             console.log('errrrr', err)
         }
-    }
-
-    if (authStatus.value?.status === 'signedIn') {
-        setRoute('/')
     }
 
     return (authStatus.value && authStatus.value.status === 'ready') ?

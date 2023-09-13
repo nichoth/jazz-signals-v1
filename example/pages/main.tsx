@@ -5,6 +5,11 @@ import { Button } from '../components/button.jsx'
 import { TodoProject, ListOfTasks } from '../types.js'
 import { TextInput } from '../components/text-input.jsx'
 
+MainView.Events = (['example']).reduce((acc, name) => {
+    acc[name] = name
+    return acc
+}, {})
+
 export function MainView ({
     params,
     localNode,

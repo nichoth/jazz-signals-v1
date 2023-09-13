@@ -3,6 +3,7 @@ import { useState } from 'preact/hooks'
 import { TextInput } from '../components/text-input.jsx'
 import { Button } from '../components/button.jsx'
 import { Bus } from '@nichoth/events'
+import './home.css'
 
 Home.Events = Bus.createEvents(['createList'], Home.name)
 
@@ -21,6 +22,7 @@ export function Home ({ setRoute, emit }:{
 
     return (<div className="route home">
         <h2>Create a new todo-list</h2>
+        <hr />
         <NewList onSubmit={createList} />
     </div>)
 }
