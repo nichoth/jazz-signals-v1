@@ -1,8 +1,7 @@
 import { signal } from '@preact/signals'
 import { Bus, NamespacedEvents } from '@nichoth/events'
 import { Events as TodoEvents } from './todo-events.js'
-import { Login } from './pages/login.jsx'
-import { SignedInStatus, localAuth } from '../src/index.js'
+import { ReadyStatus, SignedInStatus, localAuth } from '../src/index.js'
 
 export function State () {
     const state = localAuth.createState()
@@ -18,12 +17,14 @@ export function State () {
  */
 export const Events = Bus.createEvents({
     root: TodoEvents,
-    login: Login.Events,
+    login: ['login'],
     home: ['createList']
 })
 
+console.log('events', Events)
+
 State.Bus = (state:ReturnType<typeof State>) => {
-    const bus = new Bus()
+    const bus = new Bus(Bus.flatten(Events))
 
     bus.on('*', (name, data) => {
         console.log('*****', name, data)
@@ -43,8 +44,9 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // ------- login page ---------
 
-    bus.on(((Events.login as NamespacedEvents).login as string), (data) => {
-        console.log('got login request', data)
+    bus.on((Events.login as NamespacedEvents).login as string, (data) => {
+        console.log('**got login request**', data);
+        (state.authStatus.value as ReadyStatus).logIn()
     })
 
     return bus

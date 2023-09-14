@@ -1,12 +1,15 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
 import { useEffect, useState } from 'preact/hooks'
+import { Events } from '../state.js'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
 import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
 import '../components/button.css'
 import '../components/text-input.css'
 import './login.css'
+import { NamespacedEvents } from '@nichoth/events'
+const evs = Events.login
 
 /*
    type AuthStatus = {
@@ -23,12 +26,12 @@ import './login.css'
     }
  */
 
+console.log('events in here', evs)
+
 // Login.Events = (['login']).reduce((acc, name) => {
 //     acc[name] = name
 //     return acc
 // }, {})
-
-Login.Events = ['login']
 
 export function Login ({ authStatus, setRoute, emit }:{
     authStatus: Signal<AuthStatus|null>;
@@ -73,9 +76,10 @@ export function Login ({ authStatus, setRoute, emit }:{
             const { type } = (ev.target as HTMLButtonElement).dataset
             if (!type) return
 
+            console.log('form click', type)
+
             if (type === 'login') {
-                emit(emit.events.login, null)
-                // return await (authStatus.value as ReadyStatus).logIn()
+                return emit((evs as NamespacedEvents).login as string, null)
             }
 
             // type must be 'create'
@@ -121,7 +125,7 @@ export function Login ({ authStatus, setRoute, emit }:{
                 <div className="control login">
                     <h3>Login with an existing account</h3>
                     <Button isSpinning={false} disabled={false}
-                        data-type="Login"
+                        data-type="login"
                     >
                         Login
                     </Button>

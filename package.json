@@ -14,7 +14,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@nichoth/events": "3.1.5",
+    "@nichoth/events": "3.1.6",
     "@nichoth/routes": "3.0.7",
     "@preact/signals": "^1.2.1",
     "cojson": "0.2.0",
