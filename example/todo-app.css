@@ -2,6 +2,11 @@ body {
     margin: 8px;
 }
 
+h2 {
+    background-color: #fbd2d2;
+    padding: 0.5rem;
+}
+
 #root {
     font-family: sans-serif;
 

@@ -3,7 +3,7 @@ import { TodoApp } from './todo-app.jsx'
 import { State } from './state.js'
 
 /**
- * these *must* be called outside the render loop, because it creates signals.
+ * these *must* be called outside the render loop, because they create signals.
  * Or, call with `useMemo` inside the render loop
  */
 const state = State()

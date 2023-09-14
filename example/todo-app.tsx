@@ -17,8 +17,8 @@ import './todo-app.css'
 
 const evs = Events.root
 
-/** The top level view component
- *
+/**
+ * The top level view component
  *   - Setup routing
  *   - redirect to `/login` if not authed
  * @returns {FunctionComponent}
@@ -41,6 +41,8 @@ export function TodoApp ({
 
     /**
      * localNode and auth state
+     * Create a single state top level state object. That's ok because
+     * we are using signals here.
      */
     const { authStatus, localNode, logoutCount, route: routeState } = state
 
@@ -93,7 +95,7 @@ export function TodoApp ({
     }, [])
 
     /**
-     *  - instantiate a local node
+     *  - create a local node
      *  - redirect to `/login` if not authed
      */
     useEffect(() => {
@@ -115,31 +117,26 @@ export function TodoApp ({
     console.log('render', authStatus.value, localNode.value, logoutCount.value,
         routeState.value)
 
-    function logout (ev) {
-        ev.preventDefault()
-        console.log('logout');
-        (authStatus.value as SignedInStatus).logOut()
-    }
-
     const match = router.match(routeState.value)
     const Element = match.action(match, emit)
 
     return (<div className={'todo-app ' + (signedIn ? 'signed-in' : 'not-signed-in')}>
         <h1>{appName}</h1>
-        <Element setRoute={route.setRoute} logout={logout} {...state}
-            params={match.params}
+        <Element setRoute={route.setRoute} {...state} params={match.params} />
+        <LogoutControl setRoute={route.setRoute} isSignedIn={signedIn}
+            emit={emit}
         />
-
-        <LogoutControl isSignedIn={signedIn} emit={emit} />
     </div>)
 }
 
-function LogoutControl ({ isSignedIn, emit }:{
+function LogoutControl ({ isSignedIn, emit, setRoute }:{
+    setRoute:(path:string)=>void
     isSignedIn:boolean,
     emit:(name, data)=>void
 }):FunctionComponent {
     const logout = useCallback(() => {
         emit((evs as NamespacedEvents).logout as string, null)
+        // setRoute('/login')
     }, [emit])
 
     return (isSignedIn ?
@@ -151,6 +148,7 @@ function LogoutControl ({ isSignedIn, emit }:{
                 Log Out
             </Button>
         </div>) :
+
         null)
 }
 

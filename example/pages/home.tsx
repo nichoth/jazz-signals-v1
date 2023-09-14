@@ -1,35 +1,31 @@
 import { FunctionComponent } from 'preact'
 import { useState } from 'preact/hooks'
+import { NamespacedEvents } from '@nichoth/events'
 import { TextInput } from '../components/text-input.jsx'
 import { Button } from '../components/button.jsx'
-import { Bus } from '@nichoth/events'
+import { Events } from '../state.js'
 import './home.css'
-
-Home.Events = Bus.createEvents(['createList'], Home.name)
+const evs = Events.home
 
 /**
  * @TODO -- should show a list of lists
+ * or, if you already have a list, show the list
  * @returns {FunctionComponent}
  */
 export function Home ({ setRoute, emit }:{
     setRoute:(path:string) => void;
-    emit: (name:string, data:any) => void
+    emit: (name:string, data:any) => void;
 }):FunctionComponent {
     function createList (name:string) {
         console.log('create a new list', name)
-        emit(Home.Events.createList, name)
+        emit((evs as NamespacedEvents).createList as string, name)
     }
 
     return (<div className="route home">
         <h2>Create a new todo-list</h2>
-        <hr />
         <NewList onSubmit={createList} />
     </div>)
 }
-
-// function ListList ({}):FunctionComponent {
-//     return (<div>list of lists</div>)
-// }
 
 function NewList ({ onSubmit }:{
     onSubmit:(name:string) => any
