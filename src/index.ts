@@ -36,15 +36,19 @@ export function telepathicSignal<T extends CoValueImpl> ({
 
 export async function subscribe<T extends CoValueImpl> (
     id:CoID<T>,
-    localNode:Signal<LocalNode|null>
+    localNode:LocalNode|null,
+    cb:(any)=>any
 ) {
-    if (!id || !localNode.value) return
-    const node = await localNode.value.load(id)
+    if (!id || !localNode) return noop
+    const node = await localNode.load(id)
     const unsubscribe = node.subscribe(newState => {
         console.log('new state...', newState)
+        cb(newState)
     })
     return unsubscribe
 }
+
+function noop () {}
 
 export type LoadingStatus = { status: 'loading' }
 export type ReadyStatus = {

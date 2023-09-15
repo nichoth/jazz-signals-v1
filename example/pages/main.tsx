@@ -3,7 +3,7 @@ import { FunctionComponent } from 'preact'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
 import { useEffect } from 'preact/hooks'
 import { Signal, useSignal } from '@preact/signals'
-// import { telepathicSignal } from '../../src/index.js'
+import { subscribe } from '../../src/index.js'
 // import { Button } from '../components/button.jsx'
 // import { TodoProject, ListOfTasks } from '../types.js'
 // import { TextInput } from '../components/text-input.jsx'
@@ -15,55 +15,51 @@ export const MainView:FunctionComponent<{
     localNode,
     params
 }) {
-    const stateSignal:Signal<CoValueImpl|null> = useSignal(null)
+    const projectSignal:Signal<CoValueImpl|null> = useSignal(null)
+    const tasks:Signal<CoValueImpl|null> = useSignal(null)
 
+    // the same localNode,
+    // different IDs
+
+    // get the project
     useEffect(() => {
-        if (!localNode.value) return
+        let done = () => {}
 
-        localNode.value.load(params.id).then(node => {
-            const unsubscribe = node.subscribe(newState => {
-                // queueMicrotask here because otherwise it throws
-                // ReferenceError: Cannot access 'unsubscribe' before initialization
-                console.log('---new state---', newState)
-                window.queueMicrotask(() => {
-                    console.log('Got update', params.id, newState.toJSON())
-                    stateSignal.value = newState as CoValueImpl
-                })
-            })
+        // (async (done) => {
+        //     done = await subscribe(params.id, localNode.value, (newState) => {
+        //         projectSignal.value = newState
+        //     })
+        // })(_done)
 
-            return unsubscribe
+        subscribe(params.id, localNode.value, (newState) => {
+            console.log('subscribed', newState)
+            projectSignal.value = newState
+        }).then(_done => {
+            done = _done
         })
-    }, [params.id])
 
-    console.log('state signal', stateSignal.value)
+        console.log('__done___', done)
 
-    // re-load only if the id changes
-    // const telepathicState = useEffect(() => {
-    //     const telepathicState = telepathicSignal({ id: params.id, localNode })
-    //     return telepathicState
-    // }, [params.id])
+        return done
+    }, [params.id, localNode.value])
 
-    // console.log('tele state', telepathicState.value)
+    // get the list of tasks
+    useEffect(() => {
+        if (!projectSignal.value) return
+        let done = () => {}
+        subscribe(projectSignal.value.get('tasks'), localNode.value, newState => {
+            tasks.value = newState
+        }).then(_done => {
+            done = _done
+        })
 
-    // if (!telepathicState.value) return null
+        projectSignal.value.get('tasks')
+        console.log('tasks id')
+        return done
+    }, [projectSignal.value])
 
-    // const [project, done] = telepathicState.value
-
-    // // project.then()
-
-    // console.log('project getting', project?.get('tasks'))
-
-    // useEffect(() => {
-    //     // need to re-load the page if the project ID changes
-    //     // telepathicState.value.
-    // }, [params.id])
-
-    // in the main app view, they check for a project ID,
-    // and render the TodoTable if it exists
-
-    // here we don't have to check for an ID
-    // our router does that already,
-    // any only shows this page if there is a project ID
+    console.log('project signal', projectSignal.value)
+    console.log('tasks signal', tasks.value)
 
     return (<div>
         list view
