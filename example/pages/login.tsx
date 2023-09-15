@@ -69,8 +69,6 @@ export function Login ({ authStatus, setRoute, emit }:{
             const { type } = (ev.target as HTMLButtonElement).dataset
             if (!type) return
 
-            console.log('form click', type)
-
             if (type === 'login') {
                 return emit((evs as NamespacedEvents).login as string, null)
             }

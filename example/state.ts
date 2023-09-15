@@ -55,8 +55,6 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // @ts-ignore
     bus.on(Events.home.createList, (listName:string) => {
-        console.log('in here create list', listName)
-
         // To create a new todo project, we first create a `Group`,
         // which is a scope for defining access rights (reader/writer/admin)
         // of its members, which will apply to all CoValues owned by that group.
@@ -87,8 +85,6 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     return bus
 }
-
-// const navigateToValue = useCallback((id: CoID<C> | undefined) => {
 
 function navigateToProjectId (id:CoID<CoValueImpl> | undefined, setRoute) {
     setRoute(`/id/${id}`)

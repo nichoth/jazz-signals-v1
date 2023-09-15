@@ -1,35 +1,57 @@
 import { FunctionComponent } from 'preact'
 // import { useCallback } from 'preact/hooks'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
-import { useEffect, useMemo } from 'preact/hooks'
-import { Signal } from '@preact/signals'
-import { telepathicSignal } from '../../src/index.js'
+import { useEffect } from 'preact/hooks'
+import { Signal, useSignal } from '@preact/signals'
+// import { telepathicSignal } from '../../src/index.js'
 // import { Button } from '../components/button.jsx'
 // import { TodoProject, ListOfTasks } from '../types.js'
 // import { TextInput } from '../components/text-input.jsx'
 
-export function MainView ({
+export const MainView:FunctionComponent<{
+    params:{ id:CoID<CoValueImpl> }
+    localNode:Signal<LocalNode|null>
+}> = function MainView ({
     localNode,
     params
-}:{
-    params:{ id:CoID<CoValueImpl> }
-    localNode: Signal<LocalNode|null>
-}):FunctionComponent {
-    // function submit (ev:SubmitEvent) {
-    //     ev.preventDefault()
-    //     createProject((ev.target as HTMLFormElement).elements['project-name'].value)
-    // }
-    console.log('got the id', params)
+}) {
+    const stateSignal:Signal<CoValueImpl|null> = useSignal(null)
 
-    // need to wrap in `useMemo`
-    // re-load only if the id changes
-    const project = useMemo(() => {
-        return telepathicSignal({ id: params.id, localNode })
+    useEffect(() => {
+        if (!localNode.value) return
+
+        localNode.value.load(params.id).then(node => {
+            const unsubscribe = node.subscribe(newState => {
+                // queueMicrotask here because otherwise it throws
+                // ReferenceError: Cannot access 'unsubscribe' before initialization
+                console.log('---new state---', newState)
+                window.queueMicrotask(() => {
+                    console.log('Got update', params.id, newState.toJSON())
+                    stateSignal.value = newState
+                })
+            })
+
+            return unsubscribe
+        })
     }, [params.id])
 
-    console.log('tele state', project.value)
+    console.log('state signal', stateSignal.value)
 
-    console.log('project getting', project.value?.get('tasks'))
+    // re-load only if the id changes
+    // const telepathicState = useEffect(() => {
+    //     const telepathicState = telepathicSignal({ id: params.id, localNode })
+    //     return telepathicState
+    // }, [params.id])
+
+    // console.log('tele state', telepathicState.value)
+
+    // if (!telepathicState.value) return null
+
+    // const [project, done] = telepathicState.value
+
+    // // project.then()
+
+    // console.log('project getting', project?.get('tasks'))
 
     // useEffect(() => {
     //     // need to re-load the page if the project ID changes

@@ -14,14 +14,15 @@ const evs = Events.home
 export function Home ({ emit }):FunctionComponent<{
     emit: (name:string, data:any) => void;
 }> {
-    function createList (name:string) {
-        // @ts-ignore
-        emit(evs.createList, name)
-    }
+    // function createList (name:string) {
+    //     // @ts-ignore
+    //     emit(evs.createList, name)
+    // }
 
     return (<div className="route home">
         <h2>Create a new todo-list</h2>
-        <NewList onSubmit={createList} />
+        {/* @ts-ignore */}
+        <NewList onSubmit={emit(evs.createList)} />
     </div>)
 }
 
