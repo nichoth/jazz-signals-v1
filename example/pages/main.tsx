@@ -27,7 +27,7 @@ export const MainView:FunctionComponent<{
                 console.log('---new state---', newState)
                 window.queueMicrotask(() => {
                     console.log('Got update', params.id, newState.toJSON())
-                    stateSignal.value = newState
+                    stateSignal.value = newState as CoValueImpl
                 })
             })
 
