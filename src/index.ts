@@ -1,6 +1,6 @@
 import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { signal, Signal, effect } from '@preact/signals'
+import { signal, Signal, effect, computed } from '@preact/signals'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
 
 /**
@@ -12,8 +12,14 @@ export function telepathicSignal<T extends CoValueImpl> ({
 }:{
     id?:CoID<T>,
     localNode:Signal<LocalNode|null>
-}):Signal<(T & { done:()=>void })|null> {
-    const state:Signal<T & { done:()=>void }|null> = signal(null)
+}):Signal<(T & { done:(()=>void)|null })|null> {
+    const doneSignal:Signal<(()=>void)|null> = signal(null)
+
+    const state:Signal<T & { done:(()=>void)|null }|null> = computed(() => {
+        if (!doneSignal.value || !localNode.value || !id) return null
+
+        state.value = { ...state.value, done: doneSignal.value }
+    })
 
     effect(() => {
         if (!id || !localNode.value) return
@@ -21,8 +27,9 @@ export function telepathicSignal<T extends CoValueImpl> ({
         localNode.value.load(id).then(node => {
             const unsubscribe = node.subscribe(newState => {
                 console.log('Got update', id, newState.toJSON())
-                state.value = { ...newState as T, done: unsubscribe }
+                state.value = { ...newState as T, done: null }
             })
+            doneSignal.value = unsubscribe
         })
     })
 

@@ -1,7 +1,9 @@
 import { FunctionComponent } from 'preact'
 // import { useCallback } from 'preact/hooks'
-import { LocalNode } from 'cojson'
-import { useEffect } from 'preact/hooks';
+import { LocalNode, CoID, CoValueImpl } from 'cojson'
+import { useEffect } from 'preact/hooks'
+import { Signal } from '@preact/signals'
+import { telepathicSignal } from '../../src/index.js'
 // import { Button } from '../components/button.jsx'
 // import { TodoProject, ListOfTasks } from '../types.js'
 // import { TextInput } from '../components/text-input.jsx'
@@ -10,14 +12,18 @@ export function MainView ({
     localNode,
     params
 }:{
-    params:{ id:string };
-    localNode: LocalNode;
+    params:{ id:CoID<CoValueImpl> }
+    localNode: Signal<LocalNode|null>
 }):FunctionComponent {
     // function submit (ev:SubmitEvent) {
     //     ev.preventDefault()
     //     createProject((ev.target as HTMLFormElement).elements['project-name'].value)
     // }
     console.log('got the id', params)
+
+    const telepathicState = telepathicSignal({ id: params.id, localNode })
+
+    console.log('tele state', telepathicState.value)
 
     useEffect(() => {
         // need to re-load the page if the project ID changes
