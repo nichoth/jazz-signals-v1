@@ -1,6 +1,7 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
 import { useEffect, useState } from 'preact/hooks'
+import { NamespacedEvents } from '@nichoth/events'
 import { Events } from '../state.js'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
@@ -8,7 +9,6 @@ import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
 import '../components/button.css'
 import '../components/text-input.css'
 import './login.css'
-import { NamespacedEvents } from '@nichoth/events'
 const evs = Events.login
 
 /*
@@ -25,13 +25,6 @@ const evs = Events.login
         logOut: () => void;
     }
  */
-
-console.log('events in here', evs)
-
-// Login.Events = (['login']).reduce((acc, name) => {
-//     acc[name] = name
-//     return acc
-// }, {})
 
 export function Login ({ authStatus, setRoute, emit }:{
     authStatus: Signal<AuthStatus|null>;

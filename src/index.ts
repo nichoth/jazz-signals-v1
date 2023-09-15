@@ -1,29 +1,33 @@
 import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { signal, Signal } from '@preact/signals'
-import { LocalNode } from 'cojson'
+import { signal, Signal, effect } from '@preact/signals'
+import { LocalNode, CoID, CoValueImpl } from 'cojson'
 
-// /**
-//  * Create a signal for telepathic state
-//  */
-// export function telepathicSignal<T extends ContentType> (
-//     localNode:Signal<LocalNode|null>,
-//     id?: CoID<T>
-// ):Signal<T|null> {
-//     const state = signal<T|null>(null)
-//     if (!id || !localNode.value) return state
+/**
+ * Create a signal for telepathic state
+ */
+export function telepathicSignal<T extends CoValueImpl> ({
+    id,
+    localNode
+}:{
+    id?:CoID<T>,
+    localNode:Signal<LocalNode|null>
+}):Signal<(T & { done:()=>void })|null> {
+    const state:Signal<T & { done:()=>void }|null> = signal(null)
 
-//     localNode.value.load(id).then(node => {
-//         node.subscribe(newState => {
-//             console.log('Got update', id, newState.toJSON())
-//             state.value = newState as T
-//         })
-//     }).catch(err => {
-//         console.log('errrrr', err)
-//     })
+    effect(() => {
+        if (!id || !localNode.value) return
 
-//     return state
-// }
+        localNode.value.load(id).then(node => {
+            const unsubscribe = node.subscribe(newState => {
+                console.log('Got update', id, newState.toJSON())
+                state.value = { ...newState as T, done: unsubscribe }
+            })
+        })
+    })
+
+    return state
+}
 
 export type LoadingStatus = { status: 'loading' }
 export type ReadyStatus = {

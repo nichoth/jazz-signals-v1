@@ -26,9 +26,9 @@ export default function _Router ():ReturnType<Router> {
      * Need to check if there is a project ID.
      * If so, then show the app
      */
-    router.addRoute('/id/:id', (_, emit) => {
+    router.addRoute('/id/:id', (match, emit) => {
         return (props) => {
-            return MainView({ ...props, emit })
+            return MainView({ ...props, emit, params: match.params })
         }
     })
 

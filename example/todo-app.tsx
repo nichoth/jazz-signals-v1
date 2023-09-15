@@ -1,10 +1,8 @@
 import { FunctionComponent } from 'preact'
 import { CoValueImpl, LocalNode, CoID } from 'cojson'
-import Route from 'route-event'
 import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { Signal, useSignal } from '@preact/signals'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
-import { NamespacedEvents } from '@nichoth/events'
 import { Button } from './components/button.jsx'
 import { Events, State } from './state.js'
 import {
@@ -41,10 +39,14 @@ export function TodoApp ({
 
     /**
      * localNode and auth state
-     * Create a single state top level state object. That's ok because
-     * we are using signals here.
      */
-    const { authStatus, localNode, logoutCount, route: routeState } = state
+    const {
+        authStatus,
+        localNode,
+        logoutCount,
+        route: routeState,
+        routeEvent: route
+    } = state
 
     const signedIn = useMemo(() => {
         return isSignedIn(authStatus, localNode)
@@ -85,12 +87,13 @@ export function TodoApp ({
     /**
      * Listen for route changes
      */
-    const route = useMemo(() => Route(), [])
     useEffect(() => {
         return route(function onRoute (path) {
             // emit route events
             // they are handled by the app subscription
-            emit((evs as NamespacedEvents).routeChange as string, path)
+
+            // @ts-ignore
+            emit(evs.routeChange, path)
         })
     }, [])
 
@@ -122,21 +125,18 @@ export function TodoApp ({
 
     return (<div className={'todo-app ' + (signedIn ? 'signed-in' : 'not-signed-in')}>
         <h1>{appName}</h1>
-        <Element setRoute={route.setRoute} {...state} params={match.params} />
-        <LogoutControl setRoute={route.setRoute} isSignedIn={signedIn}
-            emit={emit}
-        />
+        <Element {...state} params={match.params} />
+        <LogoutControl isSignedIn={signedIn} emit={emit} />
     </div>)
 }
 
-function LogoutControl ({ isSignedIn, emit, setRoute }:{
-    setRoute:(path:string)=>void
+function LogoutControl ({ isSignedIn, emit }:{
     isSignedIn:boolean,
     emit:(name, data)=>void
 }):FunctionComponent {
     const logout = useCallback(() => {
-        emit((evs as NamespacedEvents).logout as string, null)
-        // setRoute('/login')
+        // @ts-ignore
+        emit(evs.logout, null)
     }, [emit])
 
     return (isSignedIn ?
