@@ -7,6 +7,7 @@ import { NewTaskInputRow } from '../components/new-task.jsx'
 import { telepathicSignal } from '../../src/index.js'
 import { Events } from '../state.js'
 import { Divider } from '../components/divider.jsx'
+import './main.css'
 const evs = Events.main
 
 export const MainView:FunctionComponent<{

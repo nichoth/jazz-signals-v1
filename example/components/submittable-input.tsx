@@ -10,7 +10,7 @@ export const SubmittableInput:FunctionComponent<{
     minLength?: number;
     action:string;
 }> = function SubmittableInput (props) {
-    const { onSubmit, displayName, action, minLength } = props
+    const { disabled, onSubmit, displayName, action, minLength } = props
     const [isValid, setValid] = useState(false)
 
     const handleSubmit = useCallback(function handleSubmit (ev) {
@@ -41,6 +41,8 @@ export const SubmittableInput:FunctionComponent<{
         if (_isValid !== isValid) setValid(_isValid)
     }
 
+    console.log('disabled is valid', disabled, isValid)
+
     return (
         <form
             className="submittable-input"
@@ -56,7 +58,7 @@ export const SubmittableInput:FunctionComponent<{
                 required={true}
             />
 
-            <Button disabled={!isValid} type="submit"
+            <Button disabled={disabled || !isValid} type="submit"
                 isSpinning={false}
             >
                 {action}
