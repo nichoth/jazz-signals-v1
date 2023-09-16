@@ -54,10 +54,16 @@ export const MainView:FunctionComponent<{
         <h3>{project?.get('title')}</h3>
         <ul className="todo-list">
             {tasks?.map((taskId: CoID<Task>) => {
+                const [task] = useMemo(
+                    () => telepathicSignal({ id: taskId, localNode }),
+                    [taskId, localNode]).value
+
+                console.log('task in map', task)
                 console.log('task id,', taskId)
+
                 return (<li key={taskId}>
                     <input type="checkbox" />
-                    <span>the id is: {taskId}</span>
+                    <span>{task?.get('text')}</span>
                 </li>)
             })}
         </ul>
@@ -65,7 +71,9 @@ export const MainView:FunctionComponent<{
         <Divider />
 
         <div className="task-controls">
-            <NewTaskInputRow onCreateTask={createTask} />
+            <NewTaskInputRow onCreateTask={createTask}
+                disabled={false}
+            />
         </div>
     </div>)
 }
