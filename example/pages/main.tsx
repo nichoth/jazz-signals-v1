@@ -1,10 +1,10 @@
 import { FunctionComponent } from 'preact'
-import { useMemo, useEffect, useCallback } from 'preact/hooks'
+import { useMemo, useCallback } from 'preact/hooks'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
-import { Signal, effect, useSignal } from '@preact/signals'
-import { Task, ListOfTasks } from '../types.js'
+import { signal, Signal } from '@preact/signals'
+import { Task } from '../types.js'
 import { NewTaskInputRow } from '../components/new-task.jsx'
-import { subscribe, telepathicSignal } from '../../src/index.js'
+import { telepathicSignal } from '../../src/index.js'
 import { Events } from '../state.js'
 const evs = Events.main
 
@@ -17,65 +17,48 @@ export const MainView:FunctionComponent<{
     params,
     emit
 }) {
-    const projectSignal:Signal<CoValueImpl|null> = useSignal(null)
-    const tasks:Signal<ListOfTasks|null> = useSignal(null)
-
-    // get the project
-    useEffect(() => {
-        let done = () => {}
-
-        subscribe(params.id, localNode.value, (newState) => {
-            console.log('subscribed', newState)
-            projectSignal.value = newState
-        }).then(_done => {
-            done = _done
+    // get project
+    const projectSignal = useMemo(() => {
+        return telepathicSignal({
+            id: params.id,
+            localNode
         })
+    }, [params.id, localNode])
 
-        return done
-    }, [params.id, localNode.value])
+    const [project] = projectSignal.value
 
-    // get the tasks
-    effect(() => {
-        if (!projectSignal.value) return null
-        let done = () => {}
+    // get tasks
+    const tasksSignal = useMemo(() => {
+        if (!project) return signal([])
+        const projectId = project.get('tasks')
 
-        subscribe(projectSignal.value!.get('tasks'), localNode.value, newState => {
-            tasks.value = newState
-        }).then(_done => {
-            done = _done
+        return telepathicSignal({
+            id: projectId,
+            localNode
         })
+    }, [project, localNode])
 
-        return done
-    })
-
-    console.log('**project**', projectSignal.value)
-    console.log('tasks', tasks.value)
+    const [tasks] = tasksSignal.value
 
     const createTask = useCallback(function createTask (name) {
         // @ts-ignore
-        emit(evs.createTask, name)
-    }, [])
+        emit(evs.createTask, { name, tasks })
+    }, [tasks])
+
+    console.log('rendering...', tasks)
 
     return (<div>
         list view
 
         <ul>
-            {tasks.value?.map((taskId: CoID<Task>) => {
-                // <TaskRow key={taskId} taskId={taskId} />
-                return (<span key={taskId}>the id is: {taskId}</span>)
-            }
-            )}
+            {tasks?.map((taskId: CoID<Task>) => {
+                console.log('task id,', taskId)
+                return (<li key={taskId}>the id is: {taskId}</li>)
+            })}
         </ul>
 
         <div className="task-controls">
             <NewTaskInputRow onCreateTask={createTask} />
         </div>
-
-        {/* <form onSubmit={submit}>
-            <TextInput name="project-name" displayName="Project name" />
-            <Button isSpinning={false} type="submit">
-                Create a new project
-            </Button>
-        </form> */}
     </div>)
 }
