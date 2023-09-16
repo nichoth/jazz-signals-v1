@@ -66,11 +66,13 @@ export const MainView:FunctionComponent<{
 
                 return (<li key={taskId}>
                     <form onChange={handleChange.bind(null, task)}>
-                        <input type="checkbox" name="done-status" />
-                        {task?.get('done') ?
-                            (<s>{task.get('text')}</s>) :
-                            (<span>{task?.get('text')}</span>)
-                        }
+                        <label>
+                            <input type="checkbox" name="done-status" />
+                            {task?.get('done') ?
+                                (<s>{task.get('text')}</s>) :
+                                (<span>{task?.get('text')}</span>)
+                            }
+                        </label>
                     </form>
                 </li>)
             })}
