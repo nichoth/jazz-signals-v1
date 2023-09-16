@@ -1,10 +1,10 @@
 import { FunctionComponent } from 'preact'
-import { useEffect, useCallback } from 'preact/hooks'
+import { useMemo, useEffect, useCallback } from 'preact/hooks'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
-import { Signal, useSignal, effect } from '@preact/signals'
+import { Signal, effect, useSignal } from '@preact/signals'
 import { Task, ListOfTasks } from '../types.js'
 import { NewTaskInputRow } from '../components/new-task.jsx'
-import { subscribe } from '../../src/index.js'
+import { subscribe, telepathicSignal } from '../../src/index.js'
 import { Events } from '../state.js'
 const evs = Events.main
 
@@ -39,7 +39,7 @@ export const MainView:FunctionComponent<{
         if (!projectSignal.value) return null
         let done = () => {}
 
-        subscribe(projectSignal.value.get('tasks'), localNode.value, newState => {
+        subscribe(projectSignal.value!.get('tasks'), localNode.value, newState => {
             tasks.value = newState
         }).then(_done => {
             done = _done
@@ -48,13 +48,13 @@ export const MainView:FunctionComponent<{
         return done
     })
 
+    console.log('**project**', projectSignal.value)
+    console.log('tasks', tasks.value)
+
     const createTask = useCallback(function createTask (name) {
         // @ts-ignore
         emit(evs.createTask, name)
     }, [])
-
-    console.log('project signal', projectSignal.value)
-    console.log('tasks signal', tasks.value)
 
     return (<div>
         list view

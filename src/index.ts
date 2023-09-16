@@ -12,8 +12,8 @@ export function telepathicSignal<T extends CoValueImpl> ({
 }:{
     id?:CoID<T>,
     localNode:Signal<LocalNode|null>
-}):Signal<[ T, ()=>void ]|null> {
-    const state:Signal<[ T, ()=>void ]|null> = signal(null)
+}):Signal<[ T|null, (()=>void)|null ]> {
+    const state:Signal<[ T|null, (()=>void)|null ]> = signal([null, null])
 
     const dispose = effect(async () => {
         if (!id || !localNode.value) return
@@ -21,13 +21,6 @@ export function telepathicSignal<T extends CoValueImpl> ({
         const node = await localNode.value.load(id)
 
         const unsubscribe = node.subscribe(newState => {
-            // queueMicrotask here because otherwise it throws
-            // ReferenceError: Cannot access 'unsubscribe' before initialization
-            console.log('---new state---', newState)
-            // window.queueMicrotask(() => {
-            //     console.log('Got update', id, newState.toJSON())
-            //     state.value = [newState as T, allDone]
-            // })
             console.log('Got update', id, newState.toJSON())
             state.value = [newState as T, allDone]
 
@@ -51,6 +44,7 @@ export async function subscribe<T extends CoValueImpl> (
     const unsubscribe = node.subscribe(newState => {
         cb(newState)
     })
+
     return unsubscribe
 }
 
