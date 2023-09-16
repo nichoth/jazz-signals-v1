@@ -49,11 +49,11 @@ export const MainView:FunctionComponent<{
 
     console.log('rendering...', tasks)
 
-    function handleChange (task, ev) {
+    const handleChange = useCallback(function handleChange (task, ev) {
         // "done" status is all that can change
         const checked = ev.target.form.elements['done-status'].checked
         task.edit(_task => _task.set('done', !!checked))
-    }
+    }, [])
 
     return (<div>
         <h2>List</h2>
