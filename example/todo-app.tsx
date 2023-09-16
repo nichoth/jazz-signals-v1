@@ -69,7 +69,7 @@ export function TodoApp ({
 
             if (acceptedInvitation) {
                 currentProjectId.value = acceptedInvitation.valueID
-                route.setRoute('/id/#' + acceptedInvitation.valueID)
+                route.setRoute('/id/' + acceptedInvitation.valueID)
                 // window.location.hash = acceptedInvitation.valueID
                 return
             }

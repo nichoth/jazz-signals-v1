@@ -27,7 +27,8 @@ export function State () {
 export const Events = Bus.createEvents({
     root: ['routeChange', 'logout'],
     login: ['login'],
-    home: ['createList']
+    home: ['createList'],
+    main: ['createTask']
 })
 
 console.log('events', Events)
@@ -73,6 +74,12 @@ State.Bus = (state:ReturnType<typeof State>) => {
         })
 
         navigateToProjectId(project.id, state.setRoute)
+    })
+
+    // ------------- main page -------------
+    // @ts-ignore
+    bus.on(Events.main.createTask, (taskName) => {
+        console.log('got a new task', taskName)
     })
 
     // ------------- login page -------------

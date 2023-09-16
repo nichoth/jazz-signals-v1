@@ -1,35 +1,28 @@
 import { FunctionComponent } from 'preact'
-// import { useCallback } from 'preact/hooks'
+import { useEffect, useCallback } from 'preact/hooks'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
-import { useEffect } from 'preact/hooks'
-import { Signal, useSignal } from '@preact/signals'
+import { Signal, useSignal, effect } from '@preact/signals'
+import { Task, ListOfTasks } from '../types.js'
+import { NewTaskInputRow } from '../components/new-task.jsx'
 import { subscribe } from '../../src/index.js'
-// import { Button } from '../components/button.jsx'
-// import { TodoProject, ListOfTasks } from '../types.js'
-// import { TextInput } from '../components/text-input.jsx'
+import { Events } from '../state.js'
+const evs = Events.main
 
 export const MainView:FunctionComponent<{
     params:{ id:CoID<CoValueImpl> }
     localNode:Signal<LocalNode|null>
+    emit:(a:any, b:any)=>any
 }> = function MainView ({
     localNode,
-    params
+    params,
+    emit
 }) {
     const projectSignal:Signal<CoValueImpl|null> = useSignal(null)
-    const tasks:Signal<CoValueImpl|null> = useSignal(null)
-
-    // the same localNode,
-    // different IDs
+    const tasks:Signal<ListOfTasks|null> = useSignal(null)
 
     // get the project
     useEffect(() => {
         let done = () => {}
-
-        // (async (done) => {
-        //     done = await subscribe(params.id, localNode.value, (newState) => {
-        //         projectSignal.value = newState
-        //     })
-        // })(_done)
 
         subscribe(params.id, localNode.value, (newState) => {
             console.log('subscribed', newState)
@@ -38,31 +31,45 @@ export const MainView:FunctionComponent<{
             done = _done
         })
 
-        console.log('__done___', done)
-
         return done
     }, [params.id, localNode.value])
 
-    // get the list of tasks
-    useEffect(() => {
-        if (!projectSignal.value) return
+    // get the tasks
+    effect(() => {
+        if (!projectSignal.value) return null
         let done = () => {}
+
         subscribe(projectSignal.value.get('tasks'), localNode.value, newState => {
             tasks.value = newState
         }).then(_done => {
             done = _done
         })
 
-        projectSignal.value.get('tasks')
-        console.log('tasks id')
         return done
-    }, [projectSignal.value])
+    })
+
+    const createTask = useCallback(function createTask (name) {
+        // @ts-ignore
+        emit(evs.createTask, name)
+    }, [])
 
     console.log('project signal', projectSignal.value)
     console.log('tasks signal', tasks.value)
 
     return (<div>
         list view
+
+        <ul>
+            {tasks.value?.map((taskId: CoID<Task>) => {
+                // <TaskRow key={taskId} taskId={taskId} />
+                return (<span key={taskId}>the id is: {taskId}</span>)
+            }
+            )}
+        </ul>
+
+        <div className="task-controls">
+            <NewTaskInputRow onCreateTask={createTask} />
+        </div>
 
         {/* <form onSubmit={submit}>
             <TextInput name="project-name" displayName="Project name" />
