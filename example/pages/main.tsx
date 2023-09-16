@@ -48,7 +48,12 @@ export const MainView:FunctionComponent<{
     }, [tasks])
 
     console.log('rendering...', tasks)
-    console.log('project', project)
+
+    function handleChange (task, ev) {
+        // "done" status is all that can change
+        const checked = ev.target.form.elements['done-status'].checked
+        task.edit(_task => _task.set('done', !!checked))
+    }
 
     return (<div>
         <h2>List</h2>
@@ -59,12 +64,14 @@ export const MainView:FunctionComponent<{
                     () => telepathicSignal({ id: taskId, localNode }),
                     [taskId, localNode]).value
 
-                console.log('task in map', task)
-                console.log('task id,', taskId)
-
                 return (<li key={taskId}>
-                    <input type="checkbox" />
-                    <span>{task?.get('text')}</span>
+                    <form onChange={handleChange.bind(null, task)}>
+                        <input type="checkbox" name="done-status" />
+                        {task?.get('done') ?
+                            (<s>{task.get('text')}</s>) :
+                            (<span>{task?.get('text')}</span>)
+                        }
+                    </form>
                 </li>)
             })}
         </ul>

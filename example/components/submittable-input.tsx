@@ -41,8 +41,6 @@ export const SubmittableInput:FunctionComponent<{
         if (_isValid !== isValid) setValid(_isValid)
     }
 
-    console.log('disabled is valid', disabled, isValid)
-
     return (
         <form
             className="submittable-input"
