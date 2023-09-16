@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import preact from '@preact/preset-vite'
 import postcssNesting from 'postcss-nesting'
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -16,10 +15,7 @@ export default defineConfig({
             babel: {
                 sourceMaps: 'both'
             }
-        }),
-        NodeGlobalsPolyfillPlugin({
-            buffer: true
-        }),
+        })
     ],
     // https://github.com/vitejs/vite/issues/8644#issuecomment-1159308803
     esbuild: {

@@ -1,134 +1,155 @@
 import { FunctionComponent } from 'preact'
-import { LocalNode, CoID, CoMap } from 'cojson'
-import { useEffect, useState, useMemo, useCallback } from 'preact/hooks'
+import { CoValueImpl, LocalNode, CoID } from 'cojson'
+import { useCallback, useEffect, useMemo } from 'preact/hooks'
+import { Signal, useSignal } from '@preact/signals'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
-import { Signal } from '@preact/signals'
-import { Login } from './login.jsx'
+import { Button } from './components/button.jsx'
+import { Events, State } from './state.js'
 import {
-    telepathicSignal,
     localAuth,
     AuthStatus,
     SignedInStatus
 } from '../src/index.js'
-import { TextInput } from './components/text-input.jsx'
-import { Button } from './components/button.jsx'
-import './components/text-input.css'
-import './components/button.css'
+import Router from './router.jsx'
 import './todo-app.css'
-import './list-controls.css'
 
-type TaskContent = { done: boolean; text: string };
-type Task = CoMap<TaskContent>;
-type TodoListContent = {
-    title: string;
-    [taskId: CoID<Task>]: true;  // other keys form a set of task IDs
-}
-type TodoList = CoMap<TodoListContent>
+const evs = Events.root
 
+/**
+ * The top level view component
+ *   - Setup routing
+ *   - redirect to `/login` if not authed
+ * @returns {FunctionComponent}
+ */
 export function TodoApp ({
     appName,
     syncAddress,
-    appHostName
+    appHostName,
+    emit,
+    state
 }:{
     appName:string,
     syncAddress?:string,
-    appHostName?:string
+    appHostName?:string,
+    emit:(name:string, data:any) => void,
+    state:ReturnType<typeof State>
 }):FunctionComponent {
-    const [listId, setListId] = useState<CoID<TodoList>>()
+    const router = useMemo(() => Router(), [])
+    const currentProjectId = useSignal<string>('')
 
-    const { authStatus, localNode, logoutCount } = useMemo(() => {
-        return localAuth.createState()
-    }, [])
+    /**
+     * localNode and auth state
+     */
+    const {
+        authStatus,
+        localNode,
+        logoutCount,
+        route: routeState,
+        routeEvent: route
+    } = state
 
-    const createList = useCallback((title: string) => {
-        if (!title) return
-        if (!localNode.value) return
-        const listGroup = localNode.value.createGroup()
-        const list = listGroup.createMap<TodoList>()
+    const signedIn = useMemo(() => {
+        return isSignedIn(authStatus, localNode)
+    }, [authStatus.value, localNode.value])
 
-        list.edit((list) => {
-            list.set('title', title)
-        })
+    /**
+     * Listen for hash changes
+     * This is relevant when you are viewing an existing project
+     * or when you accept an invitation
+     *
+     * see [this example](https://github.com/gardencmp/jazz/blob/main/examples/todo/src/router.ts#L5)
+     */
+    useEffect(() => {
+        const listener = async () => {
+            if (!localNode.value) return
+            const acceptedInvitation =
+                await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+                    localNode.value
+                )
 
-        window.location.hash = list.id
+            if (acceptedInvitation) {
+                currentProjectId.value = acceptedInvitation.valueID
+                route.setRoute('/id/' + acceptedInvitation.valueID)
+                // window.location.hash = acceptedInvitation.valueID
+                return
+            }
+
+            currentProjectId.value = (window.location.hash
+                .slice(1) as CoID<CoValueImpl> || null)
+        }
+
+        window.addEventListener('hashchange', listener)
+        listener()
+
+        return () => window.removeEventListener('hashchange', listener)
     }, [localNode.value])
 
     /**
-     * Get todo content
+     * Listen for route changes
      */
-    const list = useMemo(() => {
-        return telepathicSignal(localNode, listId)
-    }, [localNode.value, listId])
-
-    console.log('render', authStatus.value, localNode.value, logoutCount.value)
-
-    // @ts-ignore
-    window.authStatus = authStatus
-
-    // instantiate a local node & authenticate
     useEffect(() => {
-        const done = localAuth(appName, appHostName, {
+        return route(function onRoute (path) {
+            // emit route events
+            // they are handled by the app subscription
+
+            // @ts-ignore
+            emit(evs.routeChange, path)
+        })
+    }, [])
+
+    /**
+     *  - create a local node
+     *  - redirect to `/login` if not authed
+     */
+    useEffect(() => {
+        const unlisten = localAuth(appName, appHostName, {
             authStatus,
             localNode,
             logoutCount,
             syncAddress
         })
 
-        if (!localNode.value) return done
+        if (!signedIn) {
+            if (location.pathname === '/login') return unlisten
+            route.setRoute('/login')
+        }
 
-        return done
+        return unlisten
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
-    /**
-     * Get the app state -- todo list
-     */
-    useEffect(() => {
-        if (!localNode.value) return
-        window.addEventListener('hashchange', listener)
-        listener()
+    console.log('render', authStatus.value, localNode.value, logoutCount.value,
+        routeState.value)
 
-        async function listener () {
-            if (!localNode.value) return
-            const acceptedInvitation =
-                await consumeInviteLinkFromWindowLocation(localNode.value)
+    const match = router.match(routeState.value)
+    const Element = match.action(match, emit)
 
-            if (acceptedInvitation) {
-                setListId(acceptedInvitation.valueID as CoID<TodoList>)
-                window.location.hash = acceptedInvitation.valueID
-                return
-            }
-
-            setListId(window.location.hash.slice(1) as CoID<TodoList>)
-        }
-
-        return () => {
-            window.removeEventListener('hashchange', listener)
-        }
-    }, [localNode.value])
-
-    const signedIn = isSignedIn(authStatus, localNode)
-
-    function logout (ev) {
-        ev.preventDefault()
-        console.log('logout');
-        (authStatus.value as SignedInStatus).logOut()
-    }
-
-    return (<div className={signedIn ? 'signed-in' : 'not-signed-in'}>
+    return (<div className={'todo-app ' + (signedIn ? 'signed-in' : 'not-signed-in')}>
         <h1>{appName}</h1>
-
-        {signedIn ?
-            (<div>
-                <ListControls onCreateList={createList} />
-                signed in, this is the app
-                <TodoListEl list={list} />
-                <div>
-                    <button onClick={logout}>logout</button>
-                </div>
-            </div>) :
-            (<Login authStatus={authStatus} />)
-        }
+        <Element {...state} params={match.params} />
+        <LogoutControl isSignedIn={signedIn} emit={emit} />
     </div>)
+}
+
+function LogoutControl ({ isSignedIn, emit }:{
+    isSignedIn:boolean,
+    emit:(name, data)=>void
+}):FunctionComponent {
+    const logout = useCallback(() => {
+        // @ts-ignore
+        emit(evs.logout, null)
+    }, [emit])
+
+    return (isSignedIn ?
+        (<div className="logout">
+            <Button
+                isSpinning={false}
+                onClick={logout}
+            >
+                Log Out
+            </Button>
+        </div>) :
+
+        null)
 }
 
 function isSignedIn (
@@ -136,62 +157,4 @@ function isSignedIn (
     localNode:Signal<LocalNode|null>
 ):boolean {
     return (!!localNode.value && !!(authStatus.value as SignedInStatus).logOut)
-}
-
-function ListControls ({ onCreateList }:{
-    onCreateList: (title:string) => void
-}):FunctionComponent {
-    const [isValid, setValid] = useState(false)
-
-    function submit (ev) {
-        ev.preventDefault()
-        const { title } = ev.target.elements
-        onCreateList(title.value)
-    }
-
-    // need this because `onInput` event doesnt work for cmd + delete event
-    async function onFormKeydown (ev:KeyboardEvent) {
-        const key = ev.key
-        const { form } = ev.target as HTMLInputElement
-        if (!form) return
-        if (key !== 'Backspace' && key !== 'Delete') return
-
-        const _isValid = (form.checkValidity())
-        if (_isValid !== isValid) setValid(_isValid)
-    }
-
-    function handleInput (ev) {
-        const { form } = ev.target as HTMLInputElement
-        const _isValid = (form as HTMLFormElement).checkValidity()
-        if (_isValid !== isValid) setValid(_isValid)
-    }
-
-    return (<form className="list-controls" onSubmit={submit}
-        onInput={handleInput}
-        onKeydown={onFormKeydown}
-    >
-        <TextInput minLength={3} displayName="List name"
-            name="title"
-            required={true}
-        />
-
-        <div className="control">
-            <Button isSpinning={false}
-                disabled={!isValid}
-            >
-                Create a new todo list
-            </Button>
-        </div>
-    </form>)
-}
-
-function TodoListEl ({ list }:{ list:Signal<TodoList|null> }):FunctionComponent|null {
-    console.log('list', list?.value)
-    if (!list || !list.value) return null
-
-    return (<div className="todo-list">
-        <ul className="todo-list">
-            <li>list</li>
-        </ul>
-    </div>)
 }

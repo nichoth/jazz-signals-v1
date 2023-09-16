@@ -1,29 +1,54 @@
 import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
-import { signal, Signal } from '@preact/signals'
-import { ContentType, CoID, LocalNode } from 'cojson'
+import { signal, Signal, effect } from '@preact/signals'
+import { LocalNode, CoID, CoValueImpl } from 'cojson'
 
 /**
  * Create a signal for telepathic state
  */
-export function telepathicSignal<T extends ContentType> (
-    localNode:Signal<LocalNode|null>,
-    id?: CoID<T>
-):Signal<T|null> {
-    const state = signal<T|null>(null)
-    if (!id || !localNode.value) return state
+export function telepathicSignal<T extends CoValueImpl> ({
+    id,
+    localNode
+}:{
+    id?:CoID<T>,
+    localNode:Signal<LocalNode|null>
+}):Signal<[ T|null, (()=>void)|null ]> {
+    const state:Signal<[ T|null, (()=>void)|null ]> = signal([null, null])
 
-    localNode.value.load(id).then(node => {
-        node.subscribe(newState => {
+    const dispose = effect(async () => {
+        if (!id || !localNode.value) return
+
+        const node = await localNode.value.load(id)
+
+        const unsubscribe = node.subscribe(newState => {
             console.log('Got update', id, newState.toJSON())
-            state.value = newState as T
+            state.value = [newState as T, allDone]
+
+            function allDone () {
+                unsubscribe()
+                dispose()
+            }
         })
-    }).catch(err => {
-        console.log('errrrr', err)
     })
 
     return state
 }
+
+export async function subscribe<T extends CoValueImpl> (
+    id:CoID<T>,
+    localNode:LocalNode|null,
+    cb:(any)=>any
+):Promise<()=>void> {
+    if (!id || !localNode) return noop
+    const node = await localNode.load(id)
+    const unsubscribe = node.subscribe(newState => {
+        cb(newState)
+    })
+
+    return unsubscribe
+}
+
+function noop () {}
 
 export type LoadingStatus = { status: 'loading' }
 export type ReadyStatus = {

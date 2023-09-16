@@ -1,0 +1,16 @@
+.route.home {
+    & hr {
+        border: none;
+        opacity: 0.6;
+
+        &::after {
+            background: transparent url("wave.svg") bottom;
+            background-repeat: repeat-x;
+            background-size: 26px auto;
+            content: " ";
+            width: 100%;
+            height: 10px;
+            display: block;
+        }
+    }
+}

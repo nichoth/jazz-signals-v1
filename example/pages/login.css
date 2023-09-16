@@ -1,0 +1,10 @@
+#login-form {
+    margin: 0 auto;
+
+    & .control {
+        margin-bottom: 1rem;
+        &.login {
+            margin-top: 2rem;
+        }
+    }
+}

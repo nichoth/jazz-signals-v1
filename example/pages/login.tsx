@@ -1,12 +1,15 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
-import { useState } from 'preact/hooks'
-import { Button } from './components/button.jsx'
-import { TextInput } from './components/text-input.jsx'
-import { AuthStatus, ReadyStatus } from '../src/index.jsx'
-import './components/button.css'
-import './components/text-input.css'
+import { useEffect, useState } from 'preact/hooks'
+import { NamespacedEvents } from '@nichoth/events'
+import { Events } from '../state.js'
+import { Button } from '../components/button.jsx'
+import { TextInput } from '../components/text-input.jsx'
+import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
+import '../components/button.css'
+import '../components/text-input.css'
 import './login.css'
+const evs = Events.login
 
 /*
    type AuthStatus = {
@@ -23,8 +26,10 @@ import './login.css'
     }
  */
 
-export function Login ({ authStatus }:{
-    authStatus: Signal<AuthStatus|null>
+export function Login ({ authStatus, setRoute, emit }:{
+    authStatus: Signal<AuthStatus|null>;
+    setRoute:(path:string) => void;
+    emit:{ (name, data):void, events:Record<string, string> }
 }):FunctionComponent {
     const [isValid, setValid] = useState(false)
 
@@ -51,6 +56,12 @@ export function Login ({ authStatus }:{
         if (_isValid !== isValid) setValid(_isValid)
     }
 
+    useEffect(() => {
+        if (authStatus.value?.status === 'signedIn') {
+            setRoute('/')
+        }
+    }, [authStatus.value])
+
     async function handleFormClick (ev:MouseEvent) {
         ev.preventDefault()
 
@@ -59,15 +70,16 @@ export function Login ({ authStatus }:{
             if (!type) return
 
             if (type === 'login') {
-                return await (authStatus.value as ReadyStatus).logIn()
+                return emit((evs as NamespacedEvents).login as string, null)
             }
 
             // type must be 'create'
-            // get the username
             const username = ((ev.target as HTMLButtonElement).form!.elements
                 .namedItem('username') as HTMLInputElement).value
 
             await (authStatus.value as ReadyStatus).signUp(username)
+
+            setRoute('/')
         } catch (err) {
             console.log('errrrr', err)
         }
@@ -75,6 +87,8 @@ export function Login ({ authStatus }:{
 
     return (authStatus.value && authStatus.value.status === 'ready') ?
         (<div className="ready">
+            <h2>Login</h2>
+
             <form id="login-form" onInput={handleInput}
                 onClick={handleFormClick}
                 onKeydown={onFormKeydown}
@@ -85,18 +99,26 @@ export function Login ({ authStatus }:{
                     autoComplete="webauthn"
                 />
                 <div className="control">
+                    <h3>Create a new account</h3>
                     <Button isSpinning={false}
                         data-type="create"
                         disabled={!isValid}
                     >
-                        Create a new account
+                        Create account
                     </Button>
                 </div>
-                <div className="control">
+
+                <div className="divider">
+                    <span>or</span>
+                    <hr />
+                </div>
+
+                <div className="control login">
+                    <h3>Login with an existing account</h3>
                     <Button isSpinning={false} disabled={false}
                         data-type="login"
                     >
-                        Login with an existing account
+                        Login
                     </Button>
                 </div>
             </form>
