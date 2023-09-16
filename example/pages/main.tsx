@@ -6,6 +6,7 @@ import { Task } from '../types.js'
 import { NewTaskInputRow } from '../components/new-task.jsx'
 import { telepathicSignal } from '../../src/index.js'
 import { Events } from '../state.js'
+import { Divider } from '../components/divider.jsx'
 const evs = Events.main
 
 export const MainView:FunctionComponent<{
@@ -46,16 +47,22 @@ export const MainView:FunctionComponent<{
     }, [tasks])
 
     console.log('rendering...', tasks)
+    console.log('project', project)
 
     return (<div>
-        list view
-
-        <ul>
+        <h2>List</h2>
+        <h3>{project?.get('title')}</h3>
+        <ul className="todo-list">
             {tasks?.map((taskId: CoID<Task>) => {
                 console.log('task id,', taskId)
-                return (<li key={taskId}>the id is: {taskId}</li>)
+                return (<li key={taskId}>
+                    <input type="checkbox" />
+                    <span>the id is: {taskId}</span>
+                </li>)
             })}
         </ul>
+
+        <Divider />
 
         <div className="task-controls">
             <NewTaskInputRow onCreateTask={createTask} />

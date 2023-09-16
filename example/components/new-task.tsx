@@ -8,27 +8,10 @@ export const NewTaskInputRow:FunctionComponent<{
     onCreateTask,
     disabled,
 }) {
-    return (<div>
-        <SubmittableInput
-            onSubmit={onCreateTask}
-            displayName="New task name"
-            disabled={disabled}
-        />
-    </div>)
-
-    // return (
-    //     <TableRow>
-    //         <TableCell>
-    //             <Checkbox className="mt-1" disabled />
-    //         </TableCell>
-    //         <TableCell>
-    //             <SubmittableInput
-    //                 onSubmit={(taskText) => createTask(taskText)}
-    //                 label="Add"
-    //                 placeholder="New task"
-    //                 disabled={disabled}
-    //             />
-    //         </TableCell>
-    //     </TableRow>
-    // )
+    return (<SubmittableInput
+        action="Create a new task"
+        onSubmit={onCreateTask}
+        displayName="New task name"
+        disabled={disabled}
+    />)
 }

@@ -9,6 +9,7 @@ import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
 import '../components/button.css'
 import '../components/text-input.css'
 import './login.css'
+import { Divider } from '../components/divider.jsx'
 const evs = Events.login
 
 /*
@@ -108,10 +109,7 @@ export function Login ({ authStatus, setRoute, emit }:{
                     </Button>
                 </div>
 
-                <div className="divider">
-                    <span>or</span>
-                    <hr />
-                </div>
+                <Divider text="or" />
 
                 <div className="control login">
                     <h3>Login with an existing account</h3>

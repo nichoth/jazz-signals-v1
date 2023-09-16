@@ -4,13 +4,14 @@
     margin: 2rem 0;
 
     input {
+        border: 1px solid gray;
         font-size: 1.2rem;
         padding: 10px 10px 10px 5px;
         display: block;
 
         width: calc(100% - 1rem);
 
-        border: none;
+        /* border: none; */
         border-bottom: 1px solid #757575;
 
         &:focus {
@@ -29,13 +30,14 @@
     }
 
     label {
-        color: #999;
+        /* color: #999; */
+        color: #747474;
         font-size: 18px;
         font-weight: normal;
         position: absolute;
         pointer-events: none;
         left: 5px;
-        top: 10px;
+        top: 12px;
         transition: 0.2s ease all;
     }
     

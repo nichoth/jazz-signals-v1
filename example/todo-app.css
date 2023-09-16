@@ -45,33 +45,3 @@ h2 {
 h3 {
     margin-bottom: 0.5rem;
 }
-
-.divider {
-    text-align: center;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-
-    & > span {
-        font-style: italic;
-        padding: 1rem;
-        background-color: white;
-        position: relative;
-        z-index: 1;
-    }
-
-    & hr {
-        margin-top: -14px;
-        border: none;
-        opacity: 0.6;
-
-        &::after {
-            background: transparent url("wave.svg") bottom;
-            background-repeat: repeat-x;
-            background-size: 26px auto;
-            content: " ";
-            width: 100%;
-            height: 10px;
-            display: block;
-        }
-    }
-}
