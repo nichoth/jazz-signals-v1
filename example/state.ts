@@ -1,11 +1,13 @@
 import { signal } from '@preact/signals'
 import { Bus, NamespacedEvents } from '@nichoth/events'
 import { CoID, CoValueImpl } from 'cojson'
-// import { telepathicSignal } from '../src/index.js'
-import { ReadyStatus, SignedInStatus, localAuth } from '../src/index.js'
 import { TodoProject, ListOfTasks } from './types.js'
 import Route from 'route-event'
+import { ReadyStatus, SignedInStatus, localAuth } from '../src/index.js'
 
+/**
+ * This creates the localNode that is used throughout the application
+ */
 export function State () {
     const route = Route()
     const state = localAuth.createState()
@@ -82,7 +84,6 @@ State.Bus = (state:ReturnType<typeof State>) => {
     bus.on(Events.main.createTask, ({ name, tasks }) => {
         console.log('**got a new task**', name, tasks)
         // console.log('**tasks in here**', tasksSignal.value)
-        // const [tasks] = tasksSignal.value
         const task = tasks.group.createMap()
         task.edit((task) => {
             task.set('text', name)
@@ -92,11 +93,6 @@ State.Bus = (state:ReturnType<typeof State>) => {
         tasks.edit(projectTasks => {
             projectTasks.push(task.id)
         })
-
-        // const tasksSignal = telepathicSignal({
-        //     id: '',
-        //     localNode: state.localNode
-        // })
     })
 
     // ------------- login page -------------

@@ -14,3 +14,8 @@
         }
     }
 }
+
+.create-invitation-link {
+    position: absolute;
+    bottom: 2rem;
+}
