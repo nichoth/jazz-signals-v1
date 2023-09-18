@@ -6,7 +6,7 @@ import './toast.css'
 type ToastType = 'success'|'error'
 
 interface Props {
-    onClose: (MouseEvent) => void
+    onClose: (ev:MouseEvent) => void
     type: ToastType
 }
 

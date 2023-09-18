@@ -1,6 +1,5 @@
 import { signal } from '@preact/signals'
 import { Bus, NamespacedEvents } from '@nichoth/events'
-import { CoID, CoValueImpl } from 'cojson'
 import { TodoProject, ListOfTasks } from './types.js'
 import Route from 'route-event'
 import { ReadyStatus, SignedInStatus, localAuth } from '../src/index.js'
@@ -45,11 +44,13 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // ---------- root component ----------------
 
-    bus.on((Events.root as NamespacedEvents).routeChange as string, (ev) => {
+    // @ts-ignore
+    bus.on(Events.root.routeChange, (ev) => {
         state.route.value = ev
     })
 
-    bus.on((Events.root as NamespacedEvents).logout as string, () => {
+    // @ts-ignore
+    bus.on(Events.root.logout, () => {
         console.log('got a logout event');
         (state.authStatus.value as SignedInStatus).logOut()
         state.logoutCount.value++
@@ -76,7 +77,8 @@ State.Bus = (state:ReturnType<typeof State>) => {
             _project.set('tasks', tasks.id)
         })
 
-        navigateToProjectId(project.id, state.setRoute)
+        // then set the route
+        state.setRoute(`/id/${project.id}`)
     })
 
     // ------------- main page -------------
@@ -104,8 +106,4 @@ State.Bus = (state:ReturnType<typeof State>) => {
     })
 
     return bus
-}
-
-function navigateToProjectId (id:CoID<CoValueImpl> | undefined, setRoute) {
-    setRoute(`/id/${id}`)
 }

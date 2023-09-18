@@ -7,18 +7,14 @@ import './home.css'
 const evs = Events.home
 
 /**
- * @TODO -- should show a list of lists
- * or, if you already have a list, show the list
+ * Home view
+ * If you don't have a project yet, you see this
+ * Otherwise, you see the route `main`
  * @returns {FunctionComponent}
  */
 export function Home ({ emit }):FunctionComponent<{
     emit: (name:string, data:any) => void;
 }> {
-    // function createList (name:string) {
-    //     // @ts-ignore
-    //     emit(evs.createList, name)
-    // }
-
     return (<div className="route home">
         <h2>Create a new todo-list</h2>
         {/* @ts-ignore */}

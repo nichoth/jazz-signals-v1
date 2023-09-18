@@ -21,7 +21,7 @@ export function telepathicSignal<T extends CoValueImpl> ({
         const node = await localNode.value.load(id)
 
         const unsubscribe = node.subscribe(newState => {
-            console.log('Got update', id, newState.toJSON())
+            // console.log('Got update', id, newState.toJSON())
             state.value = [newState as T, allDone]
 
             function allDone () {

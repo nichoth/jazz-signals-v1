@@ -10,10 +10,14 @@ import { NewTaskInputRow } from '../components/new-task.jsx'
 import { telepathicSignal } from '../../src/index.js'
 import { Events } from '../state.js'
 import { Divider } from '../components/divider.jsx'
-import './main.css'
 import { CopyBtn } from '../components/copy-btn.jsx'
+import './main.css'
 const evs = Events.main
 
+/**
+ * This is the route for viewing a todo list.
+ * The todo list ID comes from the URL -- /id/<projectId>
+ */
 export const MainView:FunctionComponent<{
     params:{ id:CoID<CoValueImpl> }
     localNode:Signal<LocalNode|null>
@@ -23,26 +27,29 @@ export const MainView:FunctionComponent<{
     params,
     emit
 }) {
-    // get project
-    // subscribe to project changes
-    // project is our name for a todo list
+    /**
+     * create a new signal from the given project ID
+     */
     const projectSignal = useMemo(() => {
         return telepathicSignal({
-            id: params.id,
+            id: params.id,  // <-- here we consume the project ID
             localNode
         })
     }, [params.id, localNode])
 
     const [project] = projectSignal.value
 
-    // get tasks
+    // get tasks (the list of things to do)
     // this is where we subscribe to task changes
     const tasksSignal = useMemo(() => {
         if (!project) return signal([])
-        const projectId = project.get('tasks')
+        // we depend on the 'tasks' key existing.
+        // It is created by the subscription in ../state,
+        // in the home.createList event handler
+        const tasksId = project.get('tasks')
 
         return telepathicSignal({
-            id: projectId,
+            id: tasksId,
             localNode
         })
     }, [project, localNode])
@@ -67,9 +74,16 @@ export const MainView:FunctionComponent<{
         <h3>{project?.get('title')}</h3>
         <ul className="todo-list">
             {tasks?.map((taskId: CoID<Task>) => {
+                /**
+                 * create another state object (signal) for each task
+                 *
+                 * The `telepathicSignal` function subscribes a new signal
+                 * to the given nodeId (taskId here)
+                 */
                 const [task] = useMemo(
-                    () => telepathicSignal({ id: taskId, localNode }),
-                    [taskId, localNode]).value
+                    () => telepathicSignal<Task>({ id: taskId, localNode }),
+                    [taskId, localNode]
+                ).value  // <-- we subscribe by accessing the .value property
 
                 return (<li key={taskId}>
                     <form onChange={handleChange.bind(null, task)}>
@@ -102,8 +116,7 @@ export const MainView:FunctionComponent<{
 
 const InvitationLink:FunctionComponent<{
     list: TodoProject
-    onClick:(link:string) => void
-}> = function InvitationLink ({ list, onClick }) {
+}> = function InvitationLink ({ list }) {
     const [showToast, setToast] = useState<boolean>(false)
     const [invitation, setInvitation] = useState('')
 
@@ -114,8 +127,8 @@ const InvitationLink:FunctionComponent<{
         setToast(true)
     }
 
-    const closeToast = useCallback((ev) => {
-        ev.preventDetault()
+    const closeToast = useCallback((ev:MouseEvent) => {
+        ev.preventDefault()
         setToast(false)
     }, [])
 

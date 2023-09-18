@@ -1,8 +1,8 @@
 import { FunctionComponent } from 'preact'
-import { LocalNode } from 'cojson'
+import { LocalNode, CoValueImpl, /* CoID */ } from 'cojson'
 import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { Signal } from '@preact/signals'
-// import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
+import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Button } from './components/button.jsx'
 import { Events, State } from './state.js'
 import {
@@ -19,7 +19,6 @@ const evs = Events.root
  * The top level view component
  *   - Setup routing
  *   - redirect to `/login` if not authed
- * @returns {FunctionComponent}
  */
 export function TodoApp ({
     appName,
@@ -54,35 +53,33 @@ export function TodoApp ({
 
     /**
      * Listen for hash changes
-     * This is relevant when you are viewing an existing project
-     * or when you accept an invitation
+     * This is relevant when you accept an invitation
      *
      * see [this example](https://github.com/gardencmp/jazz/blob/main/examples/todo/src/router.ts#L5)
      */
-    // useEffect(() => {
-    //     const listener = async () => {
-    //         if (!localNode.value) return
-    //         const acceptedInvitation =
-    //             await consumeInviteLinkFromWindowLocation<CoValueImpl>(
-    //                 localNode.value
-    //             )
+    useEffect(() => {
+        const listener = async () => {
+            if (!localNode.value) return
+            const acceptedInvitation =
+                await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+                    localNode.value
+                )
 
-    //         if (acceptedInvitation) {
-    //             currentProjectId.value = acceptedInvitation.valueID
-    //             route.setRoute('/id/' + acceptedInvitation.valueID)
-    //             // window.location.hash = acceptedInvitation.valueID
-    //             return
-    //         }
+            if (acceptedInvitation) {
+                // currentProjectId.value = acceptedInvitation.valueID
+                route.setRoute('/id/' + acceptedInvitation.valueID)
+                // window.location.hash = acceptedInvitation.valueID
+            }
 
-    //         currentProjectId.value = (window.location.hash
-    //             .slice(1) as CoID<CoValueImpl> || null)
-    //     }
+            // currentProjectId.value = (window.location.hash
+            //     .slice(1) as CoID<CoValueImpl> || null)
+        }
 
-    //     window.addEventListener('hashchange', listener)
-    //     listener()
+        window.addEventListener('hashchange', listener)
+        listener()
 
-    //     return () => window.removeEventListener('hashchange', listener)
-    // }, [localNode.value])
+        return () => window.removeEventListener('hashchange', listener)
+    }, [localNode.value])
 
     /**
      * Listen for route changes
