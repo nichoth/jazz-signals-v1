@@ -1,5 +1,5 @@
 import { signal } from '@preact/signals'
-import { Bus, NamespacedEvents } from '@nichoth/events'
+import { Bus } from '@nichoth/events'
 import { TodoProject, ListOfTasks } from './types.js'
 import Route from 'route-event'
 import { ReadyStatus, SignedInStatus, localAuth } from '../src/index.js'
