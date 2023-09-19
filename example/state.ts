@@ -1,13 +1,22 @@
-import { signal } from '@preact/signals'
+import { Signal, signal } from '@preact/signals'
 import { Bus } from '@nichoth/events'
 import { TodoProject, ListOfTasks } from './types.js'
 import Route from 'route-event'
-import { ReadyStatus, SignedInStatus, localAuth } from '../src/index.js'
+import {
+    LocalAuthState,
+    ReadyStatus,
+    SignedInStatus,
+    localAuth
+} from '../src/index.js'
 
 /**
  * This creates the localNode that is used throughout the application
  */
-export function State () {
+export function State ():{
+    routeEvent:ReturnType<Route>;
+    setRoute:(route:string)=>void;
+    route:Signal<string>;
+} & LocalAuthState {
     const route = Route()
     const state = localAuth.createState()
     const routeState = signal<string>(location.pathname + location.search)

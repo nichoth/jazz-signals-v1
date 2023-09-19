@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'preact'
-import { LocalNode, CoValueImpl, /* CoID */ } from 'cojson'
+import { LocalNode, CoValueImpl } from 'cojson'
 import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { Signal } from '@preact/signals'
 import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
@@ -34,7 +34,6 @@ export function TodoApp ({
     state:ReturnType<typeof State>
 }):FunctionComponent {
     const router = useMemo(() => Router(), [])
-    // const currentProjectId = useSignal<string>('')
 
     /**
      * localNode and auth state
@@ -51,35 +50,48 @@ export function TodoApp ({
         return isSignedIn(authStatus, localNode)
     }, [authStatus.value, localNode.value])
 
+    // effect(async () => {
+    //     console.log('local node...', localNode.value)
+    //     if (!localNode.value) return
+    //     const acceptedInvitation =
+    //         await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+    //             localNode.value
+    //         )
+    //     console.log('accepted invvvvvvvvvvvv', acceptedInvitation)
+    // })
+
     /**
      * Listen for hash changes
      * This is relevant when you accept an invitation
      *
      * see [this example](https://github.com/gardencmp/jazz/blob/main/examples/todo/src/router.ts#L5)
      */
-    useEffect(() => {
-        const listener = async () => {
-            if (!localNode.value) return
-            const acceptedInvitation =
-                await consumeInviteLinkFromWindowLocation<CoValueImpl>(
-                    localNode.value
-                )
+    // useEffect(() => {
+    //     const listener = async () => {
+    //         console.log('aaaaaaaaaa', localNode.value)
+    //         if (!localNode.value) return
+    //         console.log('bbbbbbbbbbbbb')
+    //         const acceptedInvitation =
+    //             await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+    //                 localNode.value
+    //             )
+    //         console.log('accepted invvvvvvvvvvvv', acceptedInvitation)
 
-            if (acceptedInvitation) {
-                // currentProjectId.value = acceptedInvitation.valueID
-                route.setRoute('/id/' + acceptedInvitation.valueID)
-                // window.location.hash = acceptedInvitation.valueID
-            }
+    //         if (acceptedInvitation) {
+    //             // currentProjectId.value = acceptedInvitation.valueID
+    //             route.setRoute('/id/' + acceptedInvitation.valueID)
+    //             // window.location.hash = acceptedInvitation.valueID
+    //         }
 
-            // currentProjectId.value = (window.location.hash
-            //     .slice(1) as CoID<CoValueImpl> || null)
-        }
+    //         // currentProjectId.value = (window.location.hash
+    //         //     .slice(1) as CoID<CoValueImpl> || null)
+    //     }
 
-        window.addEventListener('hashchange', listener)
-        listener()
+    //     window.addEventListener('hashchange', listener)
+    //     listener()
 
-        return () => window.removeEventListener('hashchange', listener)
-    }, [localNode.value])
+    //     return () => window.removeEventListener('hashchange', listener)
+    // }, [localNode.value])
 
     /**
      * Listen for route changes
@@ -95,8 +107,32 @@ export function TodoApp ({
     }, [])
 
     /**
-     *  - create a local node
-     *  - redirect to `/login` if not authed
+     * redirect if not authd
+     */
+    useEffect(() => {
+        console.log('local nooooooooooooode', localNode.value)
+        // if (!localNode.value) return
+        let acceptedInvitation
+
+        (async () => {
+            if (!localNode.value) return
+            acceptedInvitation =
+                (await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+                    localNode.value
+                ) || null)
+            console.log('accepted down here', acceptedInvitation)
+        })()
+
+        console.log('signed in', signedIn)
+        if (!signedIn) {
+        // if (!signedIn && acceptedInvitation === null) {
+            if (location.pathname === '/login') return
+            route.setRoute('/login')
+        }
+    }, [localNode.value])
+
+    /**
+     * create a local node
      */
     useEffect(() => {
         const unlisten = localAuth(appName, appHostName, {
@@ -106,10 +142,22 @@ export function TodoApp ({
             syncAddress
         })
 
-        if (!signedIn) {
-            if (location.pathname === '/login') return unlisten
-            route.setRoute('/login')
-        }
+        // (async () => {
+        //     const acceptedInvitation =
+        //         await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+        //             localNode.value
+        //         )
+        // })()
+
+        // effect(async () => {
+        //     console.log('local node...', localNode.value)
+        //     if (!localNode.value) return
+        //     const acceptedInvitation =
+        //         await consumeInviteLinkFromWindowLocation<CoValueImpl>(
+        //             localNode.value
+        //         )
+        //     console.log('accepted invvvvvvvvvvvv', acceptedInvitation)
+        // })
 
         return unlisten
     }, [appName, appHostName, syncAddress, logoutCount.value])
@@ -145,7 +193,6 @@ function LogoutControl ({ isSignedIn, emit }:{
                 Log Out
             </Button>
         </div>) :
-
         null)
 }
 

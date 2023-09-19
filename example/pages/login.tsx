@@ -71,7 +71,8 @@ export function Login ({ authStatus, setRoute, emit }:{
             if (!type) return
 
             if (type === 'login') {
-                return emit((evs as NamespacedEvents).login as string, null)
+                // @ts-ignore
+                return emit(evs.login, null)
             }
 
             // type must be 'create'
@@ -79,7 +80,6 @@ export function Login ({ authStatus, setRoute, emit }:{
                 .namedItem('username') as HTMLInputElement).value
 
             await (authStatus.value as ReadyStatus).signUp(username)
-
             setRoute('/')
         } catch (err) {
             console.log('errrrr', err)

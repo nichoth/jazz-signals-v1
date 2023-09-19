@@ -61,8 +61,6 @@ export const MainView:FunctionComponent<{
         emit(evs.createTask, { name, tasks })
     }, [tasks])
 
-    console.log('rendering...', tasks)
-
     const handleChange = useCallback(function handleChange (task, ev) {
         // "done" status is all that can change
         const checked = ev.target.form.elements['done-status'].checked
@@ -108,15 +106,15 @@ export const MainView:FunctionComponent<{
         </div>
 
         {project ?
-            <InvitationLink list={project} /> :
+            <InvitationLinkControl list={project} /> :
             null
         }
     </div>)
 }
 
-const InvitationLink:FunctionComponent<{
+const InvitationLinkControl:FunctionComponent<{
     list: TodoProject
-}> = function InvitationLink ({ list }) {
+}> = function InvitationLinkControl ({ list }) {
     const [showToast, setToast] = useState<boolean>(false)
     const [invitation, setInvitation] = useState('')
 
