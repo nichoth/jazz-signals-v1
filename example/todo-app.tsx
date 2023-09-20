@@ -4,39 +4,37 @@ import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { Signal } from '@preact/signals'
 import { Button } from './components/button.jsx'
 import { Events, State } from './state.js'
+import Router from './router.jsx'
+import './todo-app.css'
 import {
     localAuth,
     AuthStatus,
     SignedInStatus,
 } from '../src/index.js'
-import Router from './router.jsx'
-import './todo-app.css'
 
 const evs = Events.root
 
 /**
- * The top level view component
+ * The top level view component. This is always rendered.
  *   - Setup routing
+ *   - Parse invitations
  *   - redirect to `/login` if not authed
  */
-export function TodoApp ({
-    appName,
-    syncAddress,
-    appHostName,
-    emit,
-    state
-}:{
+export const TodoApp:FunctionComponent<{
     appName:string,
     syncAddress?:string,
     appHostName?:string,
     emit:(name:string, data:any) => void,
     state:ReturnType<typeof State>
-}):FunctionComponent {
+}> = function TodoApp ({
+    appName,
+    syncAddress,
+    appHostName,
+    emit,
+    state
+}) {
     const router = useMemo(() => Router(), [])
 
-    /**
-     * localNode and auth state
-     */
     const {
         authStatus,
         localNode,
@@ -44,6 +42,7 @@ export function TodoApp ({
         routeState,
         routeEvent,
         setRoute,
+        next,
         invitation
     } = state
 
@@ -56,12 +55,13 @@ export function TodoApp ({
      */
     useEffect(() => {
         return routeEvent(function onRoute (path) {
-            routeState.value = path
+            // @ts-ignore
+            emit(evs.routeChange, { path, next: null })
         })
     }, [])
 
     /**
-     * create a local node
+     * Handle auth, create a node
      */
     useEffect(() => {
         let _unlisten:()=>void = () => null
@@ -77,7 +77,6 @@ export function TodoApp ({
         })
 
         if (invitation.value) {
-            console.log('invitation valueeeeeeee', invitation.value)
             setRoute(`/id/${invitation.value.valueID}`)
         }
 
@@ -88,10 +87,11 @@ export function TodoApp ({
      * redirect if not authd
      */
     useEffect(() => {
-        console.log('signed in', signedIn)
         if (!signedIn && !invitation.value) {
             if (location.pathname === '/login') return
             setRoute('/login')
+        } else {
+            setRoute(next.value || '/')
         }
     }, [localNode.value])
 

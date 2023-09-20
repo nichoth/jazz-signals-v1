@@ -1,4 +1,4 @@
-import { createBrowserNode } from 'jazz-browser'
+import { parseInviteLink, createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
 import { signal, Signal, effect } from '@preact/signals'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
@@ -77,7 +77,7 @@ export interface LocalAuthState {
  * Use this to get a `localNode`.
  *
  * We pass in signals and mutate their values, return a function
- * to unsubscribe
+ * to unsubscribe.
  */
 async function localAuth (
     appName:string,
@@ -127,12 +127,7 @@ async function localAuth (
         if (!valueID || !inviteSecret) throw new Error("can't parse invitation")
 
         await localNode.value.acceptInvite(valueID, inviteSecret)
-
-        console.log('accepted invite')
         invitation.value = null
-
-        // now need to go to the project
-
         return done
     }
 
@@ -144,13 +139,18 @@ async function localAuth (
     }
 }
 
-localAuth.createState = function (invitation?:Invitation):LocalAuthState {
+/**
+ * Create application state. This depends on a browser environement because
+ * we parse the invitation in the URL string
+ * @returns {LocalAuthState}
+ */
+localAuth.createState = function ():LocalAuthState {
     const authStatus:Signal<AuthStatus> = signal({ status: null })
     const localNode:Signal<LocalNode|null> = signal(null)
     const logoutCount:Signal<number> = signal(0)
-    const _invitation = signal(invitation || null)
+    const invitation = signal(parseInviteLink(location.href) || null)
 
-    return { authStatus, localNode, logoutCount, invitation: _invitation }
+    return { authStatus, localNode, logoutCount, invitation }
 }
 
 export { localAuth }

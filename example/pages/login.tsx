@@ -1,11 +1,11 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
-import { useEffect, useState } from 'preact/hooks'
-import { NamespacedEvents } from '@nichoth/events'
+// import { useEffect, useState } from 'preact/hooks'
+import { useState } from 'preact/hooks'
 import { Events, Invitation } from '../state.js'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
-import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
+import { AuthStatus } from '../../src/index.jsx'
 import '../components/button.css'
 import '../components/text-input.css'
 import './login.css'
@@ -30,9 +30,9 @@ const evs = Events.login
 export const Login:FunctionComponent<{
     authStatus: Signal<AuthStatus|null>;
     invitation: Signal<Invitation|null>;
-    setRoute:(path:string) => void;
-    emit:{ (name, data):void, events:Record<string, string> }
-}> = function Login ({ authStatus, setRoute, emit, invitation }) {
+    next:Signal<string>;
+    emit:(name:string, data:any)=>void
+}> = function Login ({ authStatus, emit, next }) {
     const [isValid, setValid] = useState(false)
 
     if (authStatus.value && authStatus.value.status === 'loading') {
@@ -40,6 +40,12 @@ export const Login:FunctionComponent<{
             loading...
         </div>)
     }
+
+    // useEffect(() => {
+    //     if (authStatus.value?.status === 'signedIn') {
+    //         setRoute('/')
+    //     }
+    // }, [authStatus.value])
 
     // need this because `onInput` event doesnt work for cmd + delete event
     async function onFormKeydown (ev:KeyboardEvent) {
@@ -58,12 +64,6 @@ export const Login:FunctionComponent<{
         if (_isValid !== isValid) setValid(_isValid)
     }
 
-    useEffect(() => {
-        if (authStatus.value?.status === 'signedIn') {
-            setRoute('/')
-        }
-    }, [authStatus.value])
-
     async function handleFormClick (ev:MouseEvent) {
         ev.preventDefault()
 
@@ -73,15 +73,15 @@ export const Login:FunctionComponent<{
 
             if (type === 'login') {
                 // @ts-ignore
-                return emit(evs.login, null)
+                return emit(evs.login, next.value)
             }
 
             // type must be 'create'
             const username = ((ev.target as HTMLButtonElement).form!.elements
                 .namedItem('username') as HTMLInputElement).value
 
-            await (authStatus.value as ReadyStatus).signUp(username)
-            setRoute('/')
+            // @ts-ignore
+            emit(evs.createAccount, { username })
         } catch (err) {
             console.log('errrrr', err)
         }

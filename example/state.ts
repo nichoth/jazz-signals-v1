@@ -2,7 +2,6 @@ import { Signal, signal } from '@preact/signals'
 import { Bus } from '@nichoth/events'
 import { CoID, CoValueImpl } from 'cojson'
 import { TodoProject, ListOfTasks } from './types.js'
-import { parseInviteLink } from 'jazz-browser'
 import Route from 'route-event'
 import {
     LocalAuthState,
@@ -16,28 +15,38 @@ export interface Invitation {
     inviteSecret: `inviteSecret_z${string}`;
 }
 
-/**
- * This creates the localNode that is used throughout the application
- */
-export function State ():{
+type AppState = ({
     routeEvent:ReturnType<Route>;
     setRoute:(route:string)=>void;
+    next:Signal<string>;
     routeState:Signal<string>;
-    invitation?:Signal<Invitation|null>;
-} & LocalAuthState {
+} & LocalAuthState)
+
+/**
+ * Create application state
+ *   - Create top level app state
+ *   - Create the localNode that is used throughout the application
+ *
+ * @returns {AppState}
+ */
+export function State ():AppState & LocalAuthState {
     const route = Route()
-    const state = localAuth.createState(parseInviteLink(location.href))
+    const state = localAuth.createState()
 
     const routeState = signal<string>(location.pathname + location.search)
-    // @ts-ignore
-    window.state = { route: routeState, ...state }
 
-    return {
+    const appState = {
         setRoute: route.setRoute.bind(route),
         routeEvent: route,
+        next: signal(location.pathname + location.search),
         routeState,
         ...state
     }
+
+    // @ts-ignore
+    window.state = appState
+
+    return appState
 }
 
 /**
@@ -46,7 +55,7 @@ export function State ():{
  */
 export const Events = Bus.createEvents({
     root: ['routeChange', 'logout'],
-    login: ['login'],
+    login: ['login', 'createAccount'],
     home: ['createList'],
     main: ['createTask']
 })
@@ -60,10 +69,11 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // ---------- root component ----------------
 
-    // // @ts-ignore
-    // bus.on(Events.root.routeChange, (ev) => {
-    //     state.routeState.value = ev
-    // })
+    // @ts-ignore
+    bus.on(Events.root.routeChange, ({ path, next }) => {
+        state.routeState.value = path
+        if (next) state.next.value = next
+    })
 
     // @ts-ignore
     bus.on(Events.root.logout, () => {
@@ -112,9 +122,19 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // ------------- login page -------------
 
+    // this just handles user actions -- clicking a login button
+    // what if you are auto-logged in?
+
     // @ts-ignore
-    bus.on(Events.login.login, (data) => {
+    bus.on(Events.login.login, (nextPath) => {
         (state.authStatus.value as ReadyStatus).logIn()
+        state.setRoute(nextPath || '/')
+    })
+
+    // @ts-ignore
+    bus.on(Events.login.createAccount, async ({ username, next }) => {
+        await (state.authStatus.value as ReadyStatus).signUp(username)
+        state.setRoute(next || '/')
     })
 
     return bus

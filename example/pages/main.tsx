@@ -115,8 +115,6 @@ const InvitationLinkControl:FunctionComponent<{
     const [showToast, setToast] = useState<boolean>(false)
     const [invitation, setInvitation] = useState('')
 
-    console.log('project invitioatn', list)
-
     function create (ev) {
         ev.preventDefault()
         const inviteLink = createInviteLink(list, 'writer')
