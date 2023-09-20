@@ -12,9 +12,6 @@ import { State } from './state.js'
 const state = State()
 const bus = State.Bus(state)  // subscribe to events here
 
-console.log('location href', location.href)
-console.log('location hash', location.hash)
-
 render(<TodoApp
     appName="Jazz Todo List Example"
     syncAddress={

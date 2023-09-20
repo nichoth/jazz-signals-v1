@@ -28,7 +28,7 @@ export const MainView:FunctionComponent<{
     emit
 }) {
     /**
-     * create a new signal from the given project ID
+     * create a new signal for the given project ID
      */
     const projectSignal = useMemo(() => {
         return telepathicSignal({
@@ -48,10 +48,7 @@ export const MainView:FunctionComponent<{
         // in the home.createList event handler
         const tasksId = project.get('tasks')
 
-        return telepathicSignal({
-            id: tasksId,
-            localNode
-        })
+        return telepathicSignal({ id: tasksId, localNode })
     }, [project, localNode])
 
     const [tasks] = tasksSignal.value
@@ -117,6 +114,8 @@ const InvitationLinkControl:FunctionComponent<{
 }> = function InvitationLinkControl ({ list }) {
     const [showToast, setToast] = useState<boolean>(false)
     const [invitation, setInvitation] = useState('')
+
+    console.log('project invitioatn', list)
 
     function create (ev) {
         ev.preventDefault()

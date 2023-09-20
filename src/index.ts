@@ -22,7 +22,6 @@ export function telepathicSignal<T extends CoValueImpl> ({
         const node = await localNode.value.load(id)
 
         const unsubscribe = node.subscribe(newState => {
-            // console.log('Got update', id, newState.toJSON())
             state.value = [newState as T, allDone]
 
             function allDone () {
@@ -71,19 +70,20 @@ export interface LocalAuthState {
     localNode:Signal<LocalNode|null>;
     logoutCount:Signal<number>;
     syncAddress?:string;
-    invitation?:Invitation;
+    invitation:Signal<Invitation|null>;
 }
 
 /**
- * Fills the place of `useJazz` in the react example.
  * Use this to get a `localNode`.
  *
  * We pass in signals and mutate their values, return a function
  * to unsubscribe
  */
-function localAuth (appName:string, appHostname:string|undefined,
-    opts:LocalAuthState)
-:() => void {
+async function localAuth (
+    appName:string,
+    appHostname:string|undefined,
+    opts:LocalAuthState
+):Promise<() => void> {
     const { syncAddress, localNode, authStatus, logoutCount, invitation } = opts
 
     const localAuthObj = new BrowserLocalAuth(
@@ -112,24 +112,33 @@ function localAuth (appName:string, appHostname:string|undefined,
         appHostname
     )
 
-    let _done:(() => void)|undefined
+    let _done:(() => void) = done
 
-    createBrowserNode({
+    const nodeHandle = await createBrowserNode({
         auth: localAuthObj,
         syncAddress
-    }).then(nodeHandle => {
-        localNode.value = nodeHandle.node
-        _done = nodeHandle.done
-        if (invitation) {
-            console.log('invitation!!!!!!!!!!!!!!!!!!!!!!!!', invitation)
-            const { valueID, inviteSecret } = invitation
-            localNode.value.acceptInvite(valueID, inviteSecret)
-        }
-    }).catch(err => {
-        console.log('error creating browser node...', err)
     })
 
-    return function done () {
+    localNode.value = nodeHandle.node
+    _done = nodeHandle.done
+
+    if (invitation.value) {
+        const { valueID, inviteSecret } = invitation.value || {}
+        if (!valueID || !inviteSecret) throw new Error("can't parse invitation")
+
+        await localNode.value.acceptInvite(valueID, inviteSecret)
+
+        console.log('accepted invite')
+        invitation.value = null
+
+        // now need to go to the project
+
+        return done
+    }
+
+    return done
+
+    function done () {
         if (!_done) throw new Error('Called `done` before it exists')
         _done()
     }
@@ -139,10 +148,9 @@ localAuth.createState = function (invitation?:Invitation):LocalAuthState {
     const authStatus:Signal<AuthStatus> = signal({ status: null })
     const localNode:Signal<LocalNode|null> = signal(null)
     const logoutCount:Signal<number> = signal(0)
-    // const _invitation = signal(invitation || null)
+    const _invitation = signal(invitation || null)
 
-    // return { authStatus, localNode, logoutCount, invitation: _invitation }
-    return { authStatus, localNode, logoutCount, invitation }
+    return { authStatus, localNode, logoutCount, invitation: _invitation }
 }
 
 export { localAuth }

@@ -1,19 +1,15 @@
-// import { Signal, signal, effect } from '@preact/signals'
 import { Signal, signal } from '@preact/signals'
 import { Bus } from '@nichoth/events'
 import { CoID, CoValueImpl } from 'cojson'
+import { TodoProject, ListOfTasks } from './types.js'
+import { parseInviteLink } from 'jazz-browser'
+import Route from 'route-event'
 import {
     LocalAuthState,
     ReadyStatus,
     SignedInStatus,
     localAuth
 } from '../src/index.js'
-import { TodoProject, ListOfTasks } from './types.js'
-import {
-    // consumeInviteLinkFromWindowLocation,
-    parseInviteLink
-} from 'jazz-browser'
-import Route from 'route-event'
 
 export interface Invitation {
     valueID: CoID<CoValueImpl>;
@@ -27,21 +23,10 @@ export function State ():{
     routeEvent:ReturnType<Route>;
     setRoute:(route:string)=>void;
     routeState:Signal<string>;
-    invitation?:Invitation;
+    invitation?:Signal<Invitation|null>;
 } & LocalAuthState {
     const route = Route()
     const state = localAuth.createState(parseInviteLink(location.href))
-
-    console.log('location', location.href)
-    console.log('location', location)
-    console.log('location hash', location.hash)
-
-    // const invitation:Signal<Invitation|null> = state.invitation
-
-    // if (location.hash) {
-    //     const inv = parseInviteLink(location.href)
-    //     if (inv) invitation.value = inv
-    // }
 
     const routeState = signal<string>(location.pathname + location.search)
     // @ts-ignore
@@ -75,10 +60,10 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // ---------- root component ----------------
 
-    // @ts-ignore
-    bus.on(Events.root.routeChange, (ev) => {
-        state.routeState.value = ev
-    })
+    // // @ts-ignore
+    // bus.on(Events.root.routeChange, (ev) => {
+    //     state.routeState.value = ev
+    // })
 
     // @ts-ignore
     bus.on(Events.root.logout, () => {

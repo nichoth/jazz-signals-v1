@@ -2,7 +2,7 @@ import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
 import { useEffect, useState } from 'preact/hooks'
 import { NamespacedEvents } from '@nichoth/events'
-import { Events } from '../state.js'
+import { Events, Invitation } from '../state.js'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
 import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
@@ -27,11 +27,12 @@ const evs = Events.login
     }
  */
 
-export function Login ({ authStatus, setRoute, emit }:{
+export const Login:FunctionComponent<{
     authStatus: Signal<AuthStatus|null>;
+    invitation: Signal<Invitation|null>;
     setRoute:(path:string) => void;
     emit:{ (name, data):void, events:Record<string, string> }
-}):FunctionComponent {
+}> = function Login ({ authStatus, setRoute, emit, invitation }) {
     const [isValid, setValid] = useState(false)
 
     if (authStatus.value && authStatus.value.status === 'loading') {

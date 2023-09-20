@@ -27,16 +27,9 @@ export default function _Router ():ReturnType<Router> {
      * If so, then show the app
      */
     router.addRoute('/id/:id', (match, emit) => {
-        // check for invitation
-        console.log('***in here***', match)
-
         return (props) => {
             return MainView({ ...props, emit, params: match.params })
         }
-    })
-
-    router.addRoute('/invitation', (match, emit) => {
-
     })
 
     return router
