@@ -10,7 +10,7 @@ import { State } from './state.js'
  * is a single localNode for the app
  */
 const state = State()
-const bus = State.Bus(state)  // subscribe to events here
+const bus = State.Bus(state)
 
 render(<TodoApp
     appName="Jazz Todo List Example"
