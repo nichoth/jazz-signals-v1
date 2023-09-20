@@ -125,9 +125,6 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // ------------- login page -------------
 
-    // this just handles user actions -- clicking a login button
-    // what if you are auto-logged in?
-
     // @ts-ignore
     bus.on(Events.login.login, (nextPath) => {
         (state.authStatus.value as ReadyStatus).logIn()

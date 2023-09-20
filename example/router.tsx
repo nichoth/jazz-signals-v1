@@ -7,10 +7,6 @@ export default function _Router ():ReturnType<Router> {
     const router = Router()
 
     router.addRoute('/', (_, emit) => {
-        // should show
-        // - a list of lists
-        //  (a list of your various todo lists)
-        // - controls to create a new list
         return (props) => {
             return Home({ ...props, emit })
         }
@@ -22,10 +18,6 @@ export default function _Router ():ReturnType<Router> {
         }
     })
 
-    /**
-     * Need to check if there is a project ID.
-     * If so, then show the app
-     */
     router.addRoute('/id/:id', (match, emit) => {
         return (props) => {
             return MainView({ ...props, emit, params: match.params })
