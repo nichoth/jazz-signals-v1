@@ -1,13 +1,24 @@
+// import { Signal, signal, effect } from '@preact/signals'
 import { Signal, signal } from '@preact/signals'
 import { Bus } from '@nichoth/events'
-import { TodoProject, ListOfTasks } from './types.js'
-import Route from 'route-event'
+import { CoID, CoValueImpl } from 'cojson'
 import {
     LocalAuthState,
     ReadyStatus,
     SignedInStatus,
     localAuth
 } from '../src/index.js'
+import { TodoProject, ListOfTasks } from './types.js'
+import {
+    // consumeInviteLinkFromWindowLocation,
+    parseInviteLink
+} from 'jazz-browser'
+import Route from 'route-event'
+
+export interface Invitation {
+    valueID: CoID<CoValueImpl>;
+    inviteSecret: `inviteSecret_z${string}`;
+}
 
 /**
  * This creates the localNode that is used throughout the application
@@ -15,10 +26,23 @@ import {
 export function State ():{
     routeEvent:ReturnType<Route>;
     setRoute:(route:string)=>void;
-    route:Signal<string>;
+    routeState:Signal<string>;
+    invitation?:Invitation;
 } & LocalAuthState {
     const route = Route()
-    const state = localAuth.createState()
+    const state = localAuth.createState(parseInviteLink(location.href))
+
+    console.log('location', location.href)
+    console.log('location', location)
+    console.log('location hash', location.hash)
+
+    // const invitation:Signal<Invitation|null> = state.invitation
+
+    // if (location.hash) {
+    //     const inv = parseInviteLink(location.href)
+    //     if (inv) invitation.value = inv
+    // }
+
     const routeState = signal<string>(location.pathname + location.search)
     // @ts-ignore
     window.state = { route: routeState, ...state }
@@ -26,7 +50,7 @@ export function State ():{
     return {
         setRoute: route.setRoute.bind(route),
         routeEvent: route,
-        route: routeState,
+        routeState,
         ...state
     }
 }
@@ -42,8 +66,6 @@ export const Events = Bus.createEvents({
     main: ['createTask']
 })
 
-console.log('events', Events)
-
 State.Bus = (state:ReturnType<typeof State>) => {
     const bus = new Bus(Bus.flatten(Events))
 
@@ -55,12 +77,11 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // @ts-ignore
     bus.on(Events.root.routeChange, (ev) => {
-        state.route.value = ev
+        state.routeState.value = ev
     })
 
     // @ts-ignore
     bus.on(Events.root.logout, () => {
-        console.log('got a logout event');
         (state.authStatus.value as SignedInStatus).logOut()
         state.logoutCount.value++
     })
@@ -93,8 +114,6 @@ State.Bus = (state:ReturnType<typeof State>) => {
     // ------------- main page -------------
     // @ts-ignore
     bus.on(Events.main.createTask, ({ name, tasks }) => {
-        console.log('**got a new task**', name, tasks)
-        // console.log('**tasks in here**', tasksSignal.value)
         const task = tasks.group.createMap()
         task.edit((task) => {
             task.set('text', name)
@@ -110,7 +129,6 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // @ts-ignore
     bus.on(Events.login.login, (data) => {
-        console.log('**got login request**', data);
         (state.authStatus.value as ReadyStatus).logIn()
     })
 

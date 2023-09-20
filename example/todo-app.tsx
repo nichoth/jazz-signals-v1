@@ -1,8 +1,8 @@
 import { FunctionComponent } from 'preact'
-import { LocalNode, CoValueImpl } from 'cojson'
+import { LocalNode } from 'cojson'
 import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { Signal } from '@preact/signals'
-import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
+// import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Button } from './components/button.jsx'
 import { Events, State } from './state.js'
 import {
@@ -42,8 +42,10 @@ export function TodoApp ({
         authStatus,
         localNode,
         logoutCount,
-        route: routeState,
-        routeEvent: route
+        routeState,
+        routeEvent,
+        setRoute,
+        invitation
     } = state
 
     const signedIn = useMemo(() => {
@@ -97,37 +99,41 @@ export function TodoApp ({
      * Listen for route changes
      */
     useEffect(() => {
-        return route(function onRoute (path) {
+        return routeEvent(function onRoute (path) {
             // emit route events
             // they are handled by the app subscription
-
             // @ts-ignore
             emit(evs.routeChange, path)
         })
     }, [])
+
+    // const acceptedInvitation = useSignal<undefined|{
+    //     valueID: CoID<CoValueImpl>;
+    //     inviteSecret: string;
+    // }>(undefined)
+
+    // need to be logged in and also have the invitation string
+
+    // effect(async () => {
+    //     if (!localNode.value) return
+    //     const accepted = await consumeInviteLinkFromWindowLocation(localNode.value)
+    //     acceptedInvitation.value = accepted
+    // })
+
+    // console.log('accepted', acceptedInvitation.value)
 
     /**
      * redirect if not authd
      */
     useEffect(() => {
         console.log('local nooooooooooooode', localNode.value)
-        // if (!localNode.value) return
-        let acceptedInvitation
 
-        (async () => {
-            if (!localNode.value) return
-            acceptedInvitation =
-                (await consumeInviteLinkFromWindowLocation<CoValueImpl>(
-                    localNode.value
-                ) || null)
-            console.log('accepted down here', acceptedInvitation)
-        })()
+        console.log('state', state)
+        console.log('invitation', state.invitation)
 
-        console.log('signed in', signedIn)
         if (!signedIn) {
-        // if (!signedIn && acceptedInvitation === null) {
             if (location.pathname === '/login') return
-            route.setRoute('/login')
+            setRoute('/login')
         }
     }, [localNode.value])
 
@@ -139,25 +145,9 @@ export function TodoApp ({
             authStatus,
             localNode,
             logoutCount,
-            syncAddress
+            syncAddress,
+            invitation
         })
-
-        // (async () => {
-        //     const acceptedInvitation =
-        //         await consumeInviteLinkFromWindowLocation<CoValueImpl>(
-        //             localNode.value
-        //         )
-        // })()
-
-        // effect(async () => {
-        //     console.log('local node...', localNode.value)
-        //     if (!localNode.value) return
-        //     const acceptedInvitation =
-        //         await consumeInviteLinkFromWindowLocation<CoValueImpl>(
-        //             localNode.value
-        //         )
-        //     console.log('accepted invvvvvvvvvvvv', acceptedInvitation)
-        // })
 
         return unlisten
     }, [appName, appHostName, syncAddress, logoutCount.value])

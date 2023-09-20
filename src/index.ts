@@ -2,6 +2,7 @@ import { createBrowserNode } from 'jazz-browser'
 import { BrowserLocalAuth } from 'jazz-browser-auth-local'
 import { signal, Signal, effect } from '@preact/signals'
 import { LocalNode, CoID, CoValueImpl } from 'cojson'
+import { Invitation } from '../example/state.js'
 
 /**
  * Create a signal for telepathic state
@@ -70,6 +71,7 @@ export interface LocalAuthState {
     localNode:Signal<LocalNode|null>;
     logoutCount:Signal<number>;
     syncAddress?:string;
+    invitation?:Invitation;
 }
 
 /**
@@ -82,7 +84,7 @@ export interface LocalAuthState {
 function localAuth (appName:string, appHostname:string|undefined,
     opts:LocalAuthState)
 :() => void {
-    const { syncAddress, localNode, authStatus, logoutCount } = opts
+    const { syncAddress, localNode, authStatus, logoutCount, invitation } = opts
 
     const localAuthObj = new BrowserLocalAuth(
         {
@@ -118,6 +120,11 @@ function localAuth (appName:string, appHostname:string|undefined,
     }).then(nodeHandle => {
         localNode.value = nodeHandle.node
         _done = nodeHandle.done
+        if (invitation) {
+            console.log('invitation!!!!!!!!!!!!!!!!!!!!!!!!', invitation)
+            const { valueID, inviteSecret } = invitation
+            localNode.value.acceptInvite(valueID, inviteSecret)
+        }
     }).catch(err => {
         console.log('error creating browser node...', err)
     })
@@ -128,12 +135,14 @@ function localAuth (appName:string, appHostname:string|undefined,
     }
 }
 
-localAuth.createState = function ():LocalAuthState {
+localAuth.createState = function (invitation?:Invitation):LocalAuthState {
     const authStatus:Signal<AuthStatus> = signal({ status: null })
     const localNode:Signal<LocalNode|null> = signal(null)
     const logoutCount:Signal<number> = signal(0)
+    // const _invitation = signal(invitation || null)
 
-    return { authStatus, localNode, logoutCount }
+    // return { authStatus, localNode, logoutCount, invitation: _invitation }
+    return { authStatus, localNode, logoutCount, invitation }
 }
 
 export { localAuth }
