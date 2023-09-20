@@ -28,7 +28,8 @@ type AppState = ({
  *   - Create the localNode that is used throughout the application
  *
  * This sets `next` as the initial route path, because this is called first
- * when the app loads.
+ * when the app loads. `next` is used for the login flow. It is the URL shown
+ * after you have logged in.
  *
  * @returns {AppState}
  */
