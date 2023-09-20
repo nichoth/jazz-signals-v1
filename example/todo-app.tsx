@@ -2,50 +2,48 @@ import { FunctionComponent } from 'preact'
 import { LocalNode } from 'cojson'
 import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { Signal } from '@preact/signals'
-// import { consumeInviteLinkFromWindowLocation } from 'jazz-browser'
 import { Button } from './components/button.jsx'
 import { Events, State } from './state.js'
+import Router from './router.jsx'
+import './todo-app.css'
 import {
     localAuth,
     AuthStatus,
-    SignedInStatus
+    SignedInStatus,
 } from '../src/index.js'
-import Router from './router.jsx'
-import './todo-app.css'
 
 const evs = Events.root
 
 /**
- * The top level view component
+ * The top level view component. This is always rendered.
  *   - Setup routing
+ *   - Parse invitations
  *   - redirect to `/login` if not authed
- * @returns {FunctionComponent}
  */
-export function TodoApp ({
-    appName,
-    syncAddress,
-    appHostName,
-    emit,
-    state
-}:{
+export const TodoApp:FunctionComponent<{
     appName:string,
     syncAddress?:string,
     appHostName?:string,
     emit:(name:string, data:any) => void,
     state:ReturnType<typeof State>
-}):FunctionComponent {
+}> = function TodoApp ({
+    appName,
+    syncAddress,
+    appHostName,
+    emit,
+    state
+}) {
     const router = useMemo(() => Router(), [])
-    // const currentProjectId = useSignal<string>('')
 
-    /**
-     * localNode and auth state
-     */
     const {
         authStatus,
         localNode,
         logoutCount,
-        route: routeState,
-        routeEvent: route
+        routeState,
+        routeEvent,
+        setRoute,
+        next,
+        invitation
     } = state
 
     const signedIn = useMemo(() => {
@@ -53,72 +51,51 @@ export function TodoApp ({
     }, [authStatus.value, localNode.value])
 
     /**
-     * Listen for hash changes
-     * This is relevant when you are viewing an existing project
-     * or when you accept an invitation
-     *
-     * see [this example](https://github.com/gardencmp/jazz/blob/main/examples/todo/src/router.ts#L5)
-     */
-    // useEffect(() => {
-    //     const listener = async () => {
-    //         if (!localNode.value) return
-    //         const acceptedInvitation =
-    //             await consumeInviteLinkFromWindowLocation<CoValueImpl>(
-    //                 localNode.value
-    //             )
-
-    //         if (acceptedInvitation) {
-    //             currentProjectId.value = acceptedInvitation.valueID
-    //             route.setRoute('/id/' + acceptedInvitation.valueID)
-    //             // window.location.hash = acceptedInvitation.valueID
-    //             return
-    //         }
-
-    //         currentProjectId.value = (window.location.hash
-    //             .slice(1) as CoID<CoValueImpl> || null)
-    //     }
-
-    //     window.addEventListener('hashchange', listener)
-    //     listener()
-
-    //     return () => window.removeEventListener('hashchange', listener)
-    // }, [localNode.value])
-
-    /**
      * Listen for route changes
      */
     useEffect(() => {
-        return route(function onRoute (path) {
-            // emit route events
-            // they are handled by the app subscription
-
+        return routeEvent(function onRoute (path) {
             // @ts-ignore
-            emit(evs.routeChange, path)
+            emit(evs.routeChange, { path, next: null })
         })
     }, [])
 
     /**
-     *  - create a local node
-     *  - redirect to `/login` if not authed
+     * Handle auth, create a node
      */
     useEffect(() => {
-        const unlisten = localAuth(appName, appHostName, {
+        let _unlisten:()=>void = () => null
+
+        localAuth(appName, appHostName, {
             authStatus,
             localNode,
             logoutCount,
-            syncAddress
+            syncAddress,
+            invitation
+        }).then(unlisten => {
+            _unlisten = unlisten
         })
 
-        if (!signedIn) {
-            if (location.pathname === '/login') return unlisten
-            route.setRoute('/login')
+        if (invitation.value) {
+            setRoute(`/id/${invitation.value.valueID}`)
         }
 
-        return unlisten
+        return _unlisten
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
-    console.log('render', authStatus.value, localNode.value, logoutCount.value,
-        routeState.value)
+    /**
+     * redirect if not authd
+     */
+    useEffect(() => {
+        if (!signedIn && !invitation.value) {
+            if (location.pathname === '/login') return
+            setRoute('/login')
+        } else {
+            setRoute(next.value || '/')
+        }
+    }, [localNode.value])
+
+    console.log('render', routeState.value)
 
     const match = router.match(routeState.value)
     const Element = match.action(match, emit)
@@ -148,7 +125,6 @@ function LogoutControl ({ isSignedIn, emit }:{
                 Log Out
             </Button>
         </div>) :
-
         null)
 }
 

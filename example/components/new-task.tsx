@@ -12,6 +12,7 @@ export const NewTaskInputRow:FunctionComponent<{
         action="Create a new task"
         onSubmit={onCreateTask}
         displayName="New task name"
+        minLength={3}
         disabled={disabled}
     />)
 }

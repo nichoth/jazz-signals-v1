@@ -1,11 +1,11 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
-import { useEffect, useState } from 'preact/hooks'
-import { NamespacedEvents } from '@nichoth/events'
-import { Events } from '../state.js'
+// import { useEffect, useState } from 'preact/hooks'
+import { useState } from 'preact/hooks'
+import { Events, Invitation } from '../state.js'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
-import { AuthStatus, ReadyStatus } from '../../src/index.jsx'
+import { AuthStatus } from '../../src/index.jsx'
 import '../components/button.css'
 import '../components/text-input.css'
 import './login.css'
@@ -27,11 +27,12 @@ const evs = Events.login
     }
  */
 
-export function Login ({ authStatus, setRoute, emit }:{
+export const Login:FunctionComponent<{
     authStatus: Signal<AuthStatus|null>;
-    setRoute:(path:string) => void;
-    emit:{ (name, data):void, events:Record<string, string> }
-}):FunctionComponent {
+    invitation: Signal<Invitation|null>;
+    next:Signal<string>;
+    emit:(name:string, data:any)=>void
+}> = function Login ({ authStatus, emit, next }) {
     const [isValid, setValid] = useState(false)
 
     if (authStatus.value && authStatus.value.status === 'loading') {
@@ -39,6 +40,12 @@ export function Login ({ authStatus, setRoute, emit }:{
             loading...
         </div>)
     }
+
+    // useEffect(() => {
+    //     if (authStatus.value?.status === 'signedIn') {
+    //         setRoute('/')
+    //     }
+    // }, [authStatus.value])
 
     // need this because `onInput` event doesnt work for cmd + delete event
     async function onFormKeydown (ev:KeyboardEvent) {
@@ -57,12 +64,6 @@ export function Login ({ authStatus, setRoute, emit }:{
         if (_isValid !== isValid) setValid(_isValid)
     }
 
-    useEffect(() => {
-        if (authStatus.value?.status === 'signedIn') {
-            setRoute('/')
-        }
-    }, [authStatus.value])
-
     async function handleFormClick (ev:MouseEvent) {
         ev.preventDefault()
 
@@ -71,16 +72,16 @@ export function Login ({ authStatus, setRoute, emit }:{
             if (!type) return
 
             if (type === 'login') {
-                return emit((evs as NamespacedEvents).login as string, null)
+                // @ts-ignore
+                return emit(evs.login, next.value)
             }
 
             // type must be 'create'
             const username = ((ev.target as HTMLButtonElement).form!.elements
                 .namedItem('username') as HTMLInputElement).value
 
-            await (authStatus.value as ReadyStatus).signUp(username)
-
-            setRoute('/')
+            // @ts-ignore
+            emit(evs.createAccount, { username })
         } catch (err) {
             console.log('errrrr', err)
         }

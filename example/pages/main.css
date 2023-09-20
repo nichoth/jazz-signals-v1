@@ -1,0 +1,21 @@
+.todo-list {
+    list-style: none;
+    padding: 0;
+
+    & li {
+        margin-bottom: 0.5rem;
+
+        & label {
+            width: fit-content;
+            cursor: pointer;
+            display: flex;
+            gap: 1rem;
+            justify-content: left;
+        }
+    }
+}
+
+.create-invitation-link {
+    position: absolute;
+    bottom: 2rem;
+}

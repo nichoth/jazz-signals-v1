@@ -1,24 +1,52 @@
-import { signal } from '@preact/signals'
-import { Bus, NamespacedEvents } from '@nichoth/events'
+import { Signal, signal } from '@preact/signals'
+import { Bus } from '@nichoth/events'
 import { CoID, CoValueImpl } from 'cojson'
-// import { telepathicSignal } from '../src/index.js'
-import { ReadyStatus, SignedInStatus, localAuth } from '../src/index.js'
 import { TodoProject, ListOfTasks } from './types.js'
 import Route from 'route-event'
+import {
+    LocalAuthState,
+    ReadyStatus,
+    SignedInStatus,
+    localAuth
+} from '../src/index.js'
 
-export function State () {
+export interface Invitation {
+    valueID: CoID<CoValueImpl>;
+    inviteSecret: `inviteSecret_z${string}`;
+}
+
+type AppState = ({
+    routeEvent:ReturnType<Route>;
+    setRoute:(route:string)=>void;
+    next:Signal<string>;
+    routeState:Signal<string>;
+} & LocalAuthState)
+
+/**
+ * Create application state
+ *   - Create top level app state
+ *   - Create the localNode that is used throughout the application
+ *
+ * @returns {AppState}
+ */
+export function State ():AppState & LocalAuthState {
     const route = Route()
     const state = localAuth.createState()
-    const routeState = signal<string>(location.pathname + location.search)
-    // @ts-ignore
-    window.state = { route: routeState, ...state }
 
-    return {
+    const routeState = signal<string>(location.pathname + location.search)
+
+    const appState = {
         setRoute: route.setRoute.bind(route),
         routeEvent: route,
-        route: routeState,
+        next: signal(location.pathname + location.search),
+        routeState,
         ...state
     }
+
+    // @ts-ignore
+    window.state = appState
+
+    return appState
 }
 
 /**
@@ -27,12 +55,10 @@ export function State () {
  */
 export const Events = Bus.createEvents({
     root: ['routeChange', 'logout'],
-    login: ['login'],
+    login: ['login', 'createAccount'],
     home: ['createList'],
     main: ['createTask']
 })
-
-console.log('events', Events)
 
 State.Bus = (state:ReturnType<typeof State>) => {
     const bus = new Bus(Bus.flatten(Events))
@@ -43,12 +69,14 @@ State.Bus = (state:ReturnType<typeof State>) => {
 
     // ---------- root component ----------------
 
-    bus.on((Events.root as NamespacedEvents).routeChange as string, (ev) => {
-        state.route.value = ev
+    // @ts-ignore
+    bus.on(Events.root.routeChange, ({ path, next }) => {
+        state.routeState.value = path
+        if (next) state.next.value = next
     })
 
-    bus.on((Events.root as NamespacedEvents).logout as string, () => {
-        console.log('got a logout event');
+    // @ts-ignore
+    bus.on(Events.root.logout, () => {
         (state.authStatus.value as SignedInStatus).logOut()
         state.logoutCount.value++
     })
@@ -74,15 +102,13 @@ State.Bus = (state:ReturnType<typeof State>) => {
             _project.set('tasks', tasks.id)
         })
 
-        navigateToProjectId(project.id, state.setRoute)
+        // then set the route
+        state.setRoute(`/id/${project.id}`)
     })
 
     // ------------- main page -------------
     // @ts-ignore
     bus.on(Events.main.createTask, ({ name, tasks }) => {
-        console.log('**got a new task**', name, tasks)
-        // console.log('**tasks in here**', tasksSignal.value)
-        // const [tasks] = tasksSignal.value
         const task = tasks.group.createMap()
         task.edit((task) => {
             task.set('text', name)
@@ -92,24 +118,24 @@ State.Bus = (state:ReturnType<typeof State>) => {
         tasks.edit(projectTasks => {
             projectTasks.push(task.id)
         })
-
-        // const tasksSignal = telepathicSignal({
-        //     id: '',
-        //     localNode: state.localNode
-        // })
     })
 
     // ------------- login page -------------
 
+    // this just handles user actions -- clicking a login button
+    // what if you are auto-logged in?
+
     // @ts-ignore
-    bus.on(Events.login.login, (data) => {
-        console.log('**got login request**', data);
+    bus.on(Events.login.login, (nextPath) => {
         (state.authStatus.value as ReadyStatus).logIn()
+        state.setRoute(nextPath || '/')
+    })
+
+    // @ts-ignore
+    bus.on(Events.login.createAccount, async ({ username, next }) => {
+        await (state.authStatus.value as ReadyStatus).signUp(username)
+        state.setRoute(next || '/')
     })
 
     return bus
-}
-
-function navigateToProjectId (id:CoID<CoValueImpl> | undefined, setRoute) {
-    setRoute(`/id/${id}`)
 }
