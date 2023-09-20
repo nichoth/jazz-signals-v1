@@ -51,7 +51,8 @@ export const TodoApp:FunctionComponent<{
     }, [authStatus.value, localNode.value])
 
     /**
-     * Listen for route changes
+     * Listen for route changes. This hears local link clicks as well as
+     * calls to `setRoute`.
      */
     useEffect(() => {
         return routeEvent(function onRoute (path) {
@@ -84,7 +85,7 @@ export const TodoApp:FunctionComponent<{
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
     /**
-     * redirect if not authd
+     * redirect if not authed
      */
     useEffect(() => {
         if (!signedIn && !invitation.value) {

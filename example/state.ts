@@ -27,6 +27,9 @@ type AppState = ({
  *   - Create top level app state
  *   - Create the localNode that is used throughout the application
  *
+ * This sets `next` as the initial route path, because this is called first
+ * when the app loads.
+ *
  * @returns {AppState}
  */
 export function State ():AppState & LocalAuthState {
