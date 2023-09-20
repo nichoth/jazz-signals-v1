@@ -88,7 +88,7 @@ export const TodoApp:FunctionComponent<{
      * redirect if not authed
      */
     useEffect(() => {
-        if (!signedIn && !invitation.value) {
+        if (!signedIn) {
             if (location.pathname === '/login') return
             setRoute('/login')
         } else {
