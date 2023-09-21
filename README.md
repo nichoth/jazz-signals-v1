@@ -121,6 +121,9 @@ function telepathicSignal<T extends CoValueImpl> ({
 }):Signal<[ T|null, (()=>void)|null ]> {
 ```
 
+Create a new signal that is subscribed to any changes from the `cojson`
+object referenced by the given `id`.
+
 ```js
 import { telepathicSignal } from '@nichoth/jazz-signals'
 
@@ -129,9 +132,6 @@ const mySignal = telepathicSignal({
     localNode
 })
 ```
-
-Create a new signal that is subscribed to any changes from the `cojson`
-object referenced by the given `id`.
 
 ```jsx
 import { telepathicSignal } from '@nichoth/jazz-signals'
