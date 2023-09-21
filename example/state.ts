@@ -130,7 +130,7 @@ State.Bus = (state:ReturnType<typeof State>) => {
     bus.on(Events.login.login, (nextPath) => {
         // this will use the `webauthn` API to authenticate identity
         (state.authStatus.value as ReadyStatus).logIn()
-        state.setRoute(nextPath || '/')
+        // state.setRoute(nextPath || '/')
     })
 
     // @ts-ignore
