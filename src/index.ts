@@ -5,7 +5,10 @@ import { LocalNode, CoID, CoValueImpl } from 'cojson'
 import { Invitation } from '../example/state.js'
 
 /**
- * Create a signal for telepathic state
+ * Create a new signal subscribed to some data in the given localNode.
+ *
+ * @returns {Signal<[ T|null, (()=>void)|null ]>} Return an array like
+ * [ signal, unsubscribeFunction ]
  */
 export function telepathicSignal<T extends CoValueImpl> ({
     id,

@@ -112,6 +112,16 @@ function MyComponent ({ appHostName, syncAddress, appName }) {
 
 ### telepathicSignal 
 ```js
+function telepathicSignal<T extends CoValueImpl> ({
+    id,
+    localNode
+}:{
+    id?:CoID<T>,
+    localNode:Signal<LocalNode|null>
+}):Signal<[ T|null, (()=>void)|null ]> {
+```
+
+```js
 import { telepathicSignal } from '@nichoth/jazz-signals'
 
 const mySignal = telepathicSignal({
