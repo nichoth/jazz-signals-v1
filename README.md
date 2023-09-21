@@ -49,7 +49,7 @@ function localAuth (
 
 This will create a new [BrowserLocalAuth](https://github.com/gardencmp/jazz/tree/fe1092ccf639d5cdb5013056d1184a415af826d0/packages/jazz-browser-auth-local), and mutate the signals passed in as `opts:LocalAuthState`. The return value is a function that will unsubscribe from `BrowserLocalAuth`. See [the example](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L76) for a demonstration of how the unsubscribe function can be used.
 
-To check if you are logged in, look for the `authStatus.value.logout` property. If `.logout` exists, then you are logged in. Call `authStatus.value.signUp` or `authStatus.value.signIn` to handle creating an account and logging in, respectively. See [an example of handling auth](https://github.com/nichoth/jazz-signals/blob/main/example/login.tsx#L54).
+To check if you are logged in, look for the `authStatus.value.logout` property. If `.logout` exists, then you are logged in. Call `authStatus.value.signUp` or `authStatus.value.signIn` to handle creating an account and logging in, respectively. See [an example of handling auth](https://github.com/nichoth/jazz-signals/blob/main/example/state.ts#L130).
 
 ## example
 An example of an application that consumes this package is in the [example directory](https://github.com/nichoth/jazz-signals/tree/main/example).
@@ -59,9 +59,10 @@ import { useMemo, useEffect } from 'preact/hooks'
 import { localAuth } from '@nichoth/jazz-signals'
 
 function MyPreactComponent ({ appName, syncAddress, appHostName }) {
-    const { authStatus, localNode, logoutCount } = useMemo(() => {
+    const state = useMemo(() => {
         return localAuth.createState()
     }, [])
+    const { authStatus, localNode, logoutCount } = state
 
     useEffect(() => {
         const done = localAuth(appName, appHostName, {
@@ -69,6 +70,7 @@ function MyPreactComponent ({ appName, syncAddress, appHostName }) {
             localNode,
             logoutCount,
             syncAddress
+            ...state
         })
 
         return done
@@ -161,8 +163,8 @@ function Component () {
 
                 // The view will re-render when the task updates.
                 // This is magically in sync with multiple devices.
-                // You can create an invitation for another device, and changes
-                // will automatically be visible on both devices.
+                // You can create an invitation for a second device, and changes
+                // will automatically be visible in both places.
                 return (<li key={taskId}>
                     {task?.get('done') ?
                         (<s>{task.get('text')}</s>) :
