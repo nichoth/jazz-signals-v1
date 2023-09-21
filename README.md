@@ -47,7 +47,7 @@ function localAuth (
 ):() => void
 ```
 
-This will create a new [BrowserLocalAuth](https://github.com/gardencmp/jazz/tree/fe1092ccf639d5cdb5013056d1184a415af826d0/packages/jazz-browser-auth-local), and subscribe the signals passed in as `opts:LocalAuthState` to its events. The return value is a function that will unsubscribe from `BrowserLocalAuth`. See [the example](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L33) for a demonstration of how the unsubscribe function can be used.
+This will create a new [BrowserLocalAuth](https://github.com/gardencmp/jazz/tree/fe1092ccf639d5cdb5013056d1184a415af826d0/packages/jazz-browser-auth-local), and mutate the signals passed in as `opts:LocalAuthState`. The return value is a function that will unsubscribe from `BrowserLocalAuth`. See [the example](https://github.com/nichoth/jazz-signals/blob/main/example/todo-app.tsx#L76) for a demonstration of how the unsubscribe function can be used.
 
 To check if you are logged in, look for the `authStatus.value.logout` property. If `.logout` exists, then you are logged in. Call `authStatus.value.signUp` or `authStatus.value.signIn` to handle creating an account and logging in. See [an example of handling auth](https://github.com/nichoth/jazz-signals/blob/main/example/login.tsx#L54).
 
