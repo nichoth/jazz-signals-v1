@@ -42,7 +42,12 @@ export function State ():AppState & LocalAuthState {
     const appState = {
         setRoute: route.setRoute.bind(route),
         routeEvent: route,
-        next: signal(location.pathname + location.search),
+        // if `/login` is the original page we loaded,
+        // then set the next path to '/'
+        next: signal(location.pathname.includes('login') ?
+            '/' :
+            (location.pathname + location.search)
+        ),
         routeState,
         ...state
     }
@@ -130,6 +135,7 @@ State.Bus = (state:ReturnType<typeof State>) => {
     bus.on(Events.login.login, async (nextPath) => {
         // this will use the `webauthn` API to authenticate identity
         await (state.authStatus.value as ReadyStatus).logIn()
+        // state.setRoute(nextPath || '/')
     })
 
     // @ts-ignore

@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
-import { useEffect, useState } from 'preact/hooks'
+import { useState } from 'preact/hooks'
 import { Events, Invitation } from '../state.js'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
@@ -41,11 +41,15 @@ export const Login:FunctionComponent<{
         </div>)
     }
 
-    useEffect(() => {
-        if (authStatus.value?.status === 'signedIn') {
-            setRoute(next.value || '/')
-        }
-    }, [authStatus.value])
+    /**
+     * Do not show this page if you are logged in
+     */
+    // useEffect(() => {
+    //     if (authStatus.value?.status === 'signedIn') {
+    //         console.log('set that route')
+    //         setRoute(next.value || '/')
+    //     }
+    // }, [authStatus.value])
 
     // need this because `onInput` event doesnt work for cmd + delete event
     async function onFormKeydown (ev:KeyboardEvent) {

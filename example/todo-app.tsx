@@ -51,14 +51,16 @@ export const TodoApp:FunctionComponent<{
     }, [authStatus.value, localNode.value])
 
     /**
-     * Listen for route changes. This hears local link clicks as well as
+     * Subscribe to route changes. This hears local link clicks as well as
      * calls to `setRoute`.
      */
     useEffect(() => {
-        return routeEvent(function onRoute (path) {
+        const ev = routeEvent(function onRoute (path) {
             // @ts-ignore
             emit(evs.routeChange, { path, next: null })
         })
+
+        return ev
     }, [])
 
     /**
@@ -97,7 +99,7 @@ export const TodoApp:FunctionComponent<{
         } else {
             setRoute(next.value || '/')
         }
-    }, [localNode.value])
+    }, [localNode.value, state.authStatus.value])
 
     console.log('render', routeState.value)
 
