@@ -127,10 +127,9 @@ State.Bus = (state:ReturnType<typeof State>) => {
     // ------------- login page -------------
 
     // @ts-ignore
-    bus.on(Events.login.login, (nextPath) => {
+    bus.on(Events.login.login, async (nextPath) => {
         // this will use the `webauthn` API to authenticate identity
-        (state.authStatus.value as ReadyStatus).logIn()
-        // state.setRoute(nextPath || '/')
+        await (state.authStatus.value as ReadyStatus).logIn()
     })
 
     // @ts-ignore

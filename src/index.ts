@@ -56,7 +56,7 @@ function noop () {}
 export type LoadingStatus = { status: 'loading' }
 export type ReadyStatus = {
     status: 'ready';
-    logIn: () => void;
+    logIn: () => Promise<void>;
     signUp: (username:string) => Promise<void>;
 }
 export type SignedInStatus = {
