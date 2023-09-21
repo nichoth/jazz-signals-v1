@@ -77,6 +77,9 @@ export const TodoApp:FunctionComponent<{
             _unlisten = unlisten
         })
 
+        // set the route via the browser API
+        // (is will trigger an event heard by `routeEvent`, which then sets
+        //   the route state in our application)
         if (invitation.value) {
             setRoute(`/id/${invitation.value.valueID}`)
         }

@@ -1,7 +1,6 @@
 import { FunctionComponent } from 'preact'
 import { Signal } from '@preact/signals'
-// import { useEffect, useState } from 'preact/hooks'
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { Events, Invitation } from '../state.js'
 import { Button } from '../components/button.jsx'
 import { TextInput } from '../components/text-input.jsx'
@@ -30,9 +29,10 @@ const evs = Events.login
 export const Login:FunctionComponent<{
     authStatus: Signal<AuthStatus|null>;
     invitation: Signal<Invitation|null>;
+    setRoute:(path:string)=>void;
     next:Signal<string>;
     emit:(name:string, data:any)=>void
-}> = function Login ({ authStatus, emit, next }) {
+}> = function Login ({ setRoute, authStatus, emit, next }) {
     const [isValid, setValid] = useState(false)
 
     if (authStatus.value && authStatus.value.status === 'loading') {
@@ -40,6 +40,12 @@ export const Login:FunctionComponent<{
             loading...
         </div>)
     }
+
+    useEffect(() => {
+        if (authStatus.value?.status === 'signedIn') {
+            setRoute(next.value || '/')
+        }
+    }, [authStatus.value])
 
     // need this because `onInput` event doesnt work for cmd + delete event
     async function onFormKeydown (ev:KeyboardEvent) {

@@ -77,3 +77,100 @@ function MyPreactComponent ({ appName, syncAddress, appHostName }) {
     // ...
 }
 ```
+
+## API
+
+### localAuth
+Create a localNode by mutating the signals that are passed in. A signal, `localNode`, is created by `localNode.createState()`.
+
+You should create a state object first with `localAuth.createState`, then pass the state to `localAuth`.
+
+```js
+import { localAuth } from '@nichoth/jazz-signals'
+import { useEffect, useMemo } from 'preact/hooks'
+
+function MyComponent ({ appHostName, syncAddress, appName }) {
+    const state = useMemo(() => localAuth.createState(), [])
+    const { localNode } = state  // <-- a signal for our localNode
+
+    /**
+     * Handle auth, create a node
+     */
+    useEffect(() => {
+        let unlisten:()=>void = () => null
+
+        localAuth(appName, appHostName, { ...state }).then(_unlisten => {
+            unlisten = _unlisten
+        })
+
+        return unlisten
+    }, [appName, appHostName, syncAddress, logoutCount.value])
+}
+```
+
+### telepathicSignal 
+```js
+import { telepathicSignal } from '@nichoth/jazz-signals'
+
+const mySignal = telepathicSignal({
+    id: 'co_zPLDBXZD5UuZtYGzpqAvgAAHhs4',
+    localNode
+})
+```
+
+Create a new signal that is subscribed to any changes from the `cojson`
+object referenced by the given `id`.
+
+```jsx
+import { telepathicSignal } from '@nichoth/jazz-signals'
+import { useMemo } from 'preact/hooks'
+
+function Component () {
+    const projectSignal = useMemo(() => {
+        return telepathicSignal({
+            // get the `id` from the URL or something
+            id: 'co_zPLDBXZD5UuZtYGzpqAvgAAHhs4',
+            localNode  // <-- here we consume the localNode we created earlier
+        })
+    }, [params.id, localNode.value])
+
+    const [project] = projectSignal.value
+
+    // get tasks (the list of things to do)
+    // this is where we subscribe to task changes
+    const tasksSignal = useMemo(() => {
+        if (!project) return signal([])
+        // we depend on the 'tasks' key existing.
+        const tasksId = project.get('tasks')
+
+        return telepathicSignal({ id: tasksId, localNode })
+    }, [project, localNode.value])
+
+    const [tasks] = tasksSignal.value
+
+    return (<div>
+        <h2>{project.get('title')}</h2>
+
+        <ul className="todo-list">
+            {tasks?.map((taskId: CoID<Task>) => {
+                // subscribe to each TODO list item
+                const [task] = useMemo(
+                    () => telepathicSignal<Task>({ id: taskId, localNode }),
+                    [taskId, localNode.value]
+                ).value
+
+                // The view will re-render when the task updates.
+                // This is magically in sync with multiple devices.
+                // You can create an invitation for another device, and changes
+                // will automatically be visible on both devices.
+                return (<li key={taskId}>
+                    {task?.get('done') ?
+                        (<s>{task.get('text')}</s>) :
+                        (<span>{task.get('text')}</span>)
+                    }
+                </li>)
+            })}
+        </ul>
+    </div>)
+}
+```

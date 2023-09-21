@@ -35,7 +35,7 @@ export const MainView:FunctionComponent<{
             id: params.id,  // <-- here we consume the project ID
             localNode
         })
-    }, [params.id, localNode])
+    }, [params.id, localNode.value])
 
     const [project] = projectSignal.value
 
@@ -49,7 +49,7 @@ export const MainView:FunctionComponent<{
         const tasksId = project.get('tasks')
 
         return telepathicSignal({ id: tasksId, localNode })
-    }, [project, localNode])
+    }, [project, localNode.value])
 
     const [tasks] = tasksSignal.value
 
@@ -77,7 +77,7 @@ export const MainView:FunctionComponent<{
                  */
                 const [task] = useMemo(
                     () => telepathicSignal<Task>({ id: taskId, localNode }),
-                    [taskId, localNode]
+                    [taskId, localNode.value]
                 ).value  // <-- we subscribe by accessing the .value property
 
                 return (<li key={taskId}>

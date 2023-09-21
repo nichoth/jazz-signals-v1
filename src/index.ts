@@ -141,7 +141,7 @@ async function localAuth (
 
 /**
  * Create application state. This depends on a browser environement because
- * we parse the invitation in the URL string
+ * we parse the invitation in the URL string.
  *  - signal for localNode
  *  - parsed invitation
  * @returns {LocalAuthState}
