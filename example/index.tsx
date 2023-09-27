@@ -13,10 +13,7 @@ const state = State()
 const bus = State.Bus(state)
 
 render(<TodoApp
-    appName="Jazz Todo List Example"
-    syncAddress={
-        new URLSearchParams(window.location.search).get('sync') || undefined
-    }
+    appName="jazz-preact Todo List Example"
     emit={bus.emit.bind(bus)}
     state={state}
 />, document.getElementById('root')!)

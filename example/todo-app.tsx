@@ -22,14 +22,10 @@ const evs = Events.root
  */
 export const TodoApp:FunctionComponent<{
     appName:string,
-    syncAddress?:string,
-    appHostName?:string,
     emit:(name:string, data:any) => void,
     state:ReturnType<typeof State>
 }> = function TodoApp ({
     appName,
-    syncAddress,
-    appHostName,
     emit,
     state
 }) {

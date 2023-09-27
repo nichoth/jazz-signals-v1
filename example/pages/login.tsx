@@ -32,7 +32,7 @@ export const Login:FunctionComponent<{
     setRoute:(path:string)=>void;
     next:Signal<string>;
     emit:(name:string, data:any)=>void
-}> = function Login ({ setRoute, authStatus, emit, next }) {
+}> = function Login ({ authStatus, emit, next }) {
     const [isValid, setValid] = useState(false)
 
     if (authStatus.value && authStatus.value.status === 'loading') {
