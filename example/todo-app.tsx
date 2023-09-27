@@ -65,11 +65,10 @@ export const TodoApp:FunctionComponent<{
     useEffect(() => {
         let unlisten:()=>void = () => null
 
-        localAuth(appName, appHostName, {
+        localAuth(appName, undefined, {
             authStatus,
             localNode,
             logoutCount,
-            syncAddress,
             invitation
         }).then(_unlisten => {
             unlisten = _unlisten
@@ -83,7 +82,7 @@ export const TodoApp:FunctionComponent<{
         }
 
         return () => unlisten()
-    }, [appName, appHostName, syncAddress, logoutCount.value])
+    }, [appName, logoutCount.value])
 
     /**
      * redirect if not authed
