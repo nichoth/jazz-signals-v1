@@ -87,9 +87,6 @@ export const MainView:FunctionComponent<{
                                 type="checkbox"
                                 name="done-status"
                             />
-                            {/* <input type="checkbox"
-                                name="done-status"
-                            /> */}
                             {task?.get('done') ?
                                 (<s>{task.get('text')}</s>) :
                                 (<span>{task?.get('text')}</span>)
