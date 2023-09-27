@@ -1,8 +1,8 @@
 import { Signal, signal } from '@preact/signals'
 import { Bus } from '@nichoth/events'
 import { CoID, CoValueImpl } from 'cojson'
-import { TodoProject, ListOfTasks } from './types.js'
 import Route from 'route-event'
+import { TodoProject, ListOfTasks } from './types.js'
 import {
     LocalAuthState,
     ReadyStatus,
@@ -25,11 +25,11 @@ type AppState = ({
 /**
  * Create application state
  *   - Create top level app state
- *   - Create the localNode that is used throughout the application
+ *   - Create the Jazz `localNode` that is used throughout the application
  *
- * This sets `next` as the initial route path, because this is called first
- * when the app loads. `next` is used for the login flow. It is the URL shown
- * after you have logged in.
+ * This sets `next` to the initial URL that the application loads with,
+ * because this is called first. `next` is used for the
+ * login flow. It is the URL shown after you have logged in.
  *
  * @returns {AppState}
  */

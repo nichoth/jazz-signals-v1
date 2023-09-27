@@ -83,7 +83,13 @@ export const MainView:FunctionComponent<{
                 return (<li key={taskId}>
                     <form onChange={handleChange.bind(null, task)}>
                         <label>
-                            <input type="checkbox" name="done-status" />
+                            <input defaultChecked={task?.get('done') || false}
+                                type="checkbox"
+                                name="done-status"
+                            />
+                            {/* <input type="checkbox"
+                                name="done-status"
+                            /> */}
                             {task?.get('done') ?
                                 (<s>{task.get('text')}</s>) :
                                 (<span>{task?.get('text')}</span>)

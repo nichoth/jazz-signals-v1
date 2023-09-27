@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "vite",
-    "lint": "standardx -v \"./**/*{.tsx,ts}\"",
+    "lint": "standardx -v \"./**/*.{tsx,ts}\"",
     "test": "esbuild --bundle --sourcemap=inline test/index.ts | tape-run | tap-arc",
     "build": "mkdir -p ./dist && rm -rf ./dist/* && tsc --project tsconfig.build.json",
     "preversion": "npm run lint",

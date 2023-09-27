@@ -67,7 +67,7 @@ export const TodoApp:FunctionComponent<{
      * Handle auth, create a node
      */
     useEffect(() => {
-        let _unlisten:()=>void = () => null
+        let unlisten:()=>void = () => null
 
         localAuth(appName, appHostName, {
             authStatus,
@@ -75,8 +75,8 @@ export const TodoApp:FunctionComponent<{
             logoutCount,
             syncAddress,
             invitation
-        }).then(unlisten => {
-            _unlisten = unlisten
+        }).then(_unlisten => {
+            unlisten = _unlisten
         })
 
         // set the route via the browser API
@@ -86,7 +86,7 @@ export const TodoApp:FunctionComponent<{
             setRoute(`/id/${invitation.value.valueID}`)
         }
 
-        return _unlisten
+        return () => unlisten()
     }, [appName, appHostName, syncAddress, logoutCount.value])
 
     /**
