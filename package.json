@@ -19,7 +19,6 @@
     "@preact/signals": "^1.2.1",
     "clipboard-copy": "4.0.1",
     "cojson": "0.2.2",
-    "flat": "5.0.2",
     "jazz-browser": "0.2.0",
     "jazz-browser-auth-local": "0.2.0",
     "route-event": "4.1.10"
