@@ -1,6 +1,6 @@
 {
   "name": "@nichoth/jazz-signals",
-  "description": "An example of [Jazz](https://jazz.tools/) + [preact signals](https://preactjs.com/blog/introducing-signals/).",
+  "description": "An example of Jazz + preact signals",
   "type": "module",
   "version": "0.0.4",
   "main": "dist/index.js",
