@@ -2,7 +2,7 @@
   "name": "@nichoth/jazz-signals",
   "description": "An example of Jazz + preact signals",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "dist/index.js",
   "scripts": {
     "start": "vite",
