@@ -1,10 +1,10 @@
 import { FunctionComponent } from 'preact'
 import { useState, useMemo, useCallback } from 'preact/hooks'
-import { LocalNode, CoID, CoValueImpl } from 'cojson'
+import { LocalNode, CoID } from 'cojson'
 import { signal, Signal } from '@preact/signals'
 import { createInviteLink } from 'jazz-browser'
 import { Toast } from '../components/toast.jsx'
-import { Task, TodoProject } from '../types.js'
+import { ListOfTasks, Task, TodoProject } from '../types.js'
 import { Button } from '../components/button.jsx'
 import { NewTaskInputRow } from '../components/new-task.jsx'
 import { telepathicSignal } from '../../src/index.js'
@@ -19,7 +19,7 @@ const evs = Events.main
  * The todo list ID comes from the URL -- /id/<projectId>
  */
 export const MainView:FunctionComponent<{
-    params:{ id:CoID<CoValueImpl> }
+    params:{ id:CoID<TodoProject> }
     localNode:Signal<LocalNode|null>
     emit:(a:any, b:any)=>any
 }> = function MainView ({
@@ -31,7 +31,7 @@ export const MainView:FunctionComponent<{
      * create a new signal for the given project ID
      */
     const projectSignal = useMemo(() => {
-        return telepathicSignal({
+        return telepathicSignal<TodoProject>({
             id: params.id,  // <-- here we consume the project ID
             localNode
         })
@@ -43,12 +43,9 @@ export const MainView:FunctionComponent<{
     // this is where we subscribe to task changes
     const tasksSignal = useMemo(() => {
         if (!project) return signal([])
-        // we depend on the 'tasks' key existing.
-        // It is created by the subscription in ../state,
-        // in the home.createList event handler
         const tasksId = project.get('tasks')
 
-        return telepathicSignal({ id: tasksId, localNode })
+        return telepathicSignal<ListOfTasks>({ id: tasksId, localNode })
     }, [project, localNode.value])
 
     const [tasks] = tasksSignal.value
