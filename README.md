@@ -14,6 +14,8 @@ npm start
 ```
 
 ## API
+
+### localAuth
 Import a function `localAuth` that helps with authentication, and has a property `createState` that returns observable state. This will create and return a signal of a `localNode`, the object used for persistence/`telepathicState`.
 
 ```js
@@ -38,7 +40,6 @@ The returned state object should be passed into the `localAuth` function. See an
 
 The signals returned are plain signals; you [would want to wrap them in a call to `useMemo`](https://preactjs.com/guide/v10/signals/#local-state-with-signals) if you use them in a view component.
 
-### localAuth
 ```ts
 function localAuth (
     appName:string,
@@ -51,39 +52,26 @@ This will create a new [BrowserLocalAuth](https://github.com/gardencmp/jazz/tree
 
 To check if you are logged in, look for the `authStatus.value.logout` property. If `.logout` exists, then you are logged in. Call `authStatus.value.signUp` or `authStatus.value.signIn` to handle creating an account and logging in, respectively. See [an example of handling auth](https://github.com/nichoth/jazz-signals/blob/main/example/state.ts#L130).
 
-## example
-An example of an application that consumes this package is in the [example directory](https://github.com/nichoth/jazz-signals/tree/main/example).
 
-```js
-import { useMemo, useEffect } from 'preact/hooks'
-import { localAuth } from '@nichoth/jazz-signals'
-
-function MyPreactComponent ({ appName, syncAddress, appHostName }) {
-    const state = useMemo(() => {
-        return localAuth.createState()
-    }, [])
-    const { authStatus, localNode, logoutCount } = state
-
-    useEffect(() => {
-        const done = localAuth(appName, appHostName, {
-            authStatus,
-            localNode,
-            logoutCount,
-            syncAddress
-            ...state
-        })
-
-        return done
-    }, [appName, appHostName, syncAddress, logoutCount.value])
-
-    // ...
-}
+### telepathicSignal 
+```ts
+function telepathicSignal<T extends CoValueImpl> ({
+    id,
+    localNode
+}:{
+    id?:CoID<T>,
+    localNode:Signal<LocalNode|null>
+}):Signal<[ T|null, (()=>void)|null ]> {
 ```
 
-## API
+-------
+
+## example
 
 ### localAuth
-Create a localNode by mutating the signals that are passed in. A signal, `localNode`, is created by `localNode.createState()`.
+An example of an application that consumes this package is in the [example directory](https://github.com/nichoth/jazz-signals/tree/main/example).
+
+Create a localNode by mutating the signals that are passed in. Signals are created by `localNode.createState`.
 
 You should create a state object first with `localAuth.createState`, then pass the state to `localAuth`.
 
@@ -110,17 +98,7 @@ function MyComponent ({ appHostName, syncAddress, appName }) {
 }
 ```
 
-### telepathicSignal 
-```js
-function telepathicSignal<T extends CoValueImpl> ({
-    id,
-    localNode
-}:{
-    id?:CoID<T>,
-    localNode:Signal<LocalNode|null>
-}):Signal<[ T|null, (()=>void)|null ]> {
-```
-
+### telepathicSignal
 Create a new signal that is subscribed to any changes from the `cojson`
 object referenced by the given `id`.
 
